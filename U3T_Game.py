@@ -1,0 +1,414 @@
+__author__ = 'Bartosz'
+
+from Tkinter import *
+import time
+
+class U3T_Game:
+
+    def __init__(self, r):
+        self.canvas = Canvas(r, width=700, height=700)
+        self.gameCells = ['~' for x in range(9)]
+        self.scButtons = [[[Label, 0, 0] for x in range(9)] for y in range(9)]
+        self.singleCells = [['~' for x in range(9)] for y in range(9)]
+        self.initializeGame()
+        self.player = 'X'
+
+
+#====================================================================================================
+
+    def initializeGame(self):
+        self.canvas.pack()
+        self.drawGameBoard()
+
+        img = PhotoImage(file="imageXO.gif", width=60, height=60)
+        bigCells = [50, 250, 450]
+        smallCells = [0, (200 / 3), (200 / 3) * 2]
+
+        gcLoc = 0
+        scLoc = 0
+
+        # Initialize single cells and place single cell buttons
+        for i in range(3):
+            for j in range(3):
+                for k in range(3):
+                    for l in range(3):
+                        self.scButtons[gcLoc][scLoc] = [Label(self.canvas, image=img, bg="white"),
+                                                        bigCells[j] + smallCells[l] + 2,
+                                                        bigCells[i] + smallCells[k] + 2]
+                        self.scButtons[gcLoc][scLoc][0].place(x=bigCells[j] + smallCells[l] + 2,
+                                                              y=bigCells[i] + smallCells[k] + 2)
+
+                        self.scButtons[gcLoc][scLoc][0].bind("<Button>",
+                            lambda event, coord=[gcLoc, scLoc]: self.activateButton(event, coord))
+                        scLoc += 1
+                gcLoc += 1
+                scLoc = 0
+        gcLoc = 0
+
+#====================================================================================================
+
+    def drawGameBoard(self):
+        buf = 700 / 14
+        x1 = 700 - buf
+        x2 = (700 - 2 * buf) / 3 + buf
+        x3 = 2 * (700 - 2 * buf) / 3 + buf
+
+        #Draw big game board
+        self.canvas.create_rectangle(buf, buf, x1, x1, width=4)
+        self.canvas.create_line(buf, x2, x1, x2, width=4)
+        self.canvas.create_line(buf, x3, x1, x3, width=4)
+        self.canvas.create_line(x2, buf, x2, x1, width=4)
+        self.canvas.create_line(x3, buf, x3, x1, width=4)
+
+        buf = (200 / 3)
+        coordinates = [50 + buf + 1, 50 + buf * 2 + 1, 50 + buf * 4 + 3,
+                       50 + buf * 5 + 3, 50 + buf * 7 + 5, 50 + buf * 8 + 5]
+
+        # Draw small game cells
+        # Draw vertical lines
+        for i in range(6):
+            self.canvas.create_line(coordinates[i], 50, coordinates[i], 650, width=2)
+
+        # Draw horizontal lines
+        for i in range(6):
+            self.canvas.create_line(50, coordinates[i], 650, coordinates[i], width=2)
+
+#====================================================================================================
+    # All game logic in activateButton
+    def activateButton(self, event, coord):
+        gcLoc = coord[0]
+        scLoc = coord[1]
+
+        if self.gameCells[gcLoc] == '~':
+            self.scButtons[gcLoc][scLoc][0].destroy()
+            self.singleCells[gcLoc][scLoc] = self.player
+            self.drawScShape(self.player, coord)
+            self.determineGameCellWinner(gcLoc)
+            #self.freezeCells(scLoc)                    Uncomment this and comment NETWORKING to fix
+            self.determineWinner()
+            self.printStats()
+            time.sleep(1)
+            #------NETWORKING------#
+            ####################################
+            #self.freezeCells('!') #'!' for NETWORKING
+            coordinates = []
+            gcLoc = int(input('Enter gcLoc: '))
+            scLoc = int(input('Enter scLoc: '))
+            coordinates.append(gcLoc)
+            coordinates.append(scLoc)
+            print coordinates[0], coordinates[1]
+            self.receiveCoord(coordinates)
+            ####################################
+
+#====================================================================================================
+    #______NETWORKING_______
+    def receiveCoord(self, coord):
+        gcLoc = coord[0]
+        scLoc = coord[1]
+
+        print gcLoc, scLoc
+        self.scButtons[gcLoc][scLoc][0].destroy()
+        self.singleCells[gcLoc][scLoc] = self.player
+        self.drawScShape(self.player, coord)
+        self.determineGameCellWinner(gcLoc)
+        self.freezeCells(scLoc)
+        self.determineWinner()
+        self.printStats()
+
+#====================================================================================================
+
+    def drawGcShape(self, shape, gcLoc):
+        coord = [50, 250, 450]
+        scLocs = []
+
+        self.gameCells[gcLoc] = shape
+
+        # Append coordinates for each single cell in the game cell
+        for i in range(3):
+            for j in range(3):
+                scLocs.append([coord[j], coord[i]])
+
+        x = scLocs[gcLoc][0]
+        y = scLocs[gcLoc][1]
+        s = 200
+        b = 200 / 10
+        s = 700 / 14
+
+        self.canvas.create_rectangle(x, y, x + 200, y + 200, fill="white", outline="black", width=4)
+
+        # Destroy all buttons in game cell
+        for i in range(9):
+            if self.singleCells[gcLoc][i] != 'X' or self.singleCells[gcLoc][i] != 'O':
+                self.scButtons[gcLoc][i][0].destroy()
+
+        # Place shape in game cell
+        if shape == 'O':
+            self.canvas.create_oval(x + b, y + b, x + 200 - b, y + 200 - b, outline="red", width=12)
+        else:
+            self.canvas.create_line(x + b, y + b, x + 200 - b, y + 200 - b, fill="blue", width=12)
+            self.canvas.create_line(x + b, y + 200 - b, x + 200 - b, y + b, fill="blue", width=12)
+
+#====================================================================================================
+
+    def drawScShape(self, shape, coord):
+        buf = 200 / 20
+        s = -4
+
+        x = self.scButtons[coord[0]][coord[1]][1]
+        y = self.scButtons[coord[0]][coord[1]][2]
+
+        # Place shape in single cell
+        if shape == 'O':
+            self.canvas.create_oval(x + buf + s + 2, y + buf + s + 2,
+                                    x + 60 - buf - s, y + 60 - buf - s, outline="red", width=7)
+            self.player = 'X'
+        elif shape == 'X':
+            self.canvas.create_line(x + buf - 2, y + buf - 2, x + 60 + s, y + 60 + s,
+                                    fill="blue", width=7)
+            self.canvas.create_line(x + buf - 2, y + 60 + s, x + 60 + s, y + buf - 2,
+                                    fill="blue", width=7)
+            self.player = 'O'
+
+#====================================================================================================
+
+    def freezeCells(self, noFreeze):
+        ####################################
+        if(noFreeze == '!'):
+            for i in range(9):
+                if self.gameCells[i] == '~':
+                    self.gameCells[i] = '@'
+                self.highlightCellSection(False, i)
+        ####################################
+
+
+        # Normalize Cells
+        for i in range(9):
+            if self.gameCells[i] == '@':
+                self.gameCells[i] = '~'
+            self.highlightCellSection(False, i)
+
+        # Freeze all cells but target cell
+        # if target cell is free
+        if self.gameCells[noFreeze] == '~':
+            for i in range(9):
+                if self.gameCells[i] == '~':
+                    self.gameCells[i] = '@'
+            self.gameCells[noFreeze] = '~'
+            self.highlightCellSection(True, noFreeze)
+            return
+
+        self.highlightGameBoard(True)
+
+#====================================================================================================
+
+    def highlightGameBoard(self, boolean):
+        if(boolean == True):
+            self.canvas.create_rectangle(50, 50, 650, 650, outline="#00CC00", width=4)
+        else:
+            self.canvas.create_rectangle(50, 50, 650, 650, outline="black", width=4)
+
+#====================================================================================================
+
+    def highlightCellSection(self, boolean, gcLoc):
+        coord = [50, 250, 450]
+        gcLocs = []
+
+        for i in range(3):
+            for j in range(3):
+                gcLocs.append([coord[j], coord[i]])
+
+        x = gcLocs[gcLoc][0]
+        y = gcLocs[gcLoc][1]
+        s = 200
+
+        if boolean == True:
+            self.canvas.create_rectangle(x, y, x + s, y + s, outline="#00CC00", width=4)
+        else:
+            self.canvas.create_rectangle(x, y, x + s, y + s, outline="black", width=4)
+
+#====================================================================================================
+
+    def determineGameCellWinner(self, gcLoc):
+        player = 'X'
+
+        # Check each player victory status for game cell
+        for i in range(2):
+            # Horizontal victory
+            for j in range(0, 7, 3):
+                if(self.singleCells[gcLoc][j] == player and
+                   self.singleCells[gcLoc][j + 1] == player and
+                   self.singleCells[gcLoc][j + 2] == player):
+                    self.drawGcShape(player, gcLoc)
+                    return True
+
+            # Vertical victory
+            for j in range(0, 3):
+                if(self.singleCells[gcLoc][j] == player and
+                   self.singleCells[gcLoc][j + 3] == player and
+                   self.singleCells[gcLoc][j + 6] == player):
+                    self.drawGcShape(player, gcLoc)
+                    return True
+
+            # Diagonal victory
+            for j in range(0, 3, 2):
+                if(self.singleCells[gcLoc][j] == player and
+                   self.singleCells[gcLoc][4] == player and
+                   self.singleCells[gcLoc][8 - j] == player):
+                    self.drawGcShape(player, gcLoc)
+                    return True
+
+            # Switch player
+            player = 'O'
+
+        noWinner = 0
+        for i in range(9):
+            if self.singleCells[gcLoc][i] != '~':
+                noWinner += 1
+
+        if noWinner == 9:
+            self.gameCells[gcLoc] = '!'
+
+        return False
+
+#====================================================================================================
+
+    def determineWinner(self):
+        player = 'X'
+
+        victory = 0
+
+        # Check each player victory status for game
+        for i in range(2):
+            # Horizontal victory
+            for j in range(0, 7, 3):
+                if(self.gameCells[j] == player and
+                   self.gameCells[j + 1] == player and
+                   self.gameCells[j + 2] == player):
+                    self.endGame()
+                    self.drawVictory(victory)
+                    self.drawEndGameMessage(player)
+                    return True
+                victory += 1
+
+            # vertical victory
+            for j in range(0, 3):
+                if(self.gameCells[j] == player and
+                   self.gameCells[j + 3] == player and
+                   self.gameCells[j + 6] == player):
+                    self.endGame()
+                    self.drawVictory(victory)
+                    self.drawEndGameMessage(player)
+                    return True
+                victory += 1
+
+            # Diagonal victory
+            for j in range(0, 3, 2):
+                if(self.gameCells[j] == player and
+                   self.gameCells[4] == player and
+                   self.gameCells[8 - j] == player):
+                    self.endGame()
+                    self.drawVictory(victory)
+                    self.drawEndGameMessage(player)
+                    return True
+                victory += 1
+
+            # Switch player and reset victory number
+            player = 'O'
+            victory = 0
+
+        noWinner = 0
+        for i in range(9):
+            if self.gameCells[i] != '~':
+                noWinner += 1
+
+        if noWinner == 9:
+            self.drawEndGameMessage('!')
+            return True
+        return False
+
+#====================================================================================================
+
+    def endGame(self):
+        for i in range(9):
+            self.highlightCellSection(False, i)
+            for j in range(9):
+                if self.singleCells[i][j] == '~':
+                    self.scButtons[i][j][0].destroy()
+
+#====================================================================================================
+
+    def drawEndGameMessage(self, player):
+        if player == 'X':
+            l = Label(self.canvas, text="Player X Wins!", bg="white", font=('Arial', 50), fg="blue")
+        elif player == 'O':
+            l = Label(self.canvas, text="Player O Wins!", bg="white", font=('Arial', 50), fg="red")
+        else:
+            l = Label(self.canvas, text="Draw!", bg="white", font=('Arial', 50), fg="black")
+
+        l.place(x=200, y=250)
+
+#====================================================================================================
+
+    def drawVictory(self, victory):
+        # Accross top
+        if(victory == 0):
+            self.canvas.create_line(60, 150, 640, 150, width=15)
+        # Across middle
+        elif(victory == 1):
+            self.canvas.create_line(60, 350, 640, 350, width=15)
+        # Across bottom
+        elif(victory == 2):
+            self.canvas.create_line(60, 550, 640, 550, width=15)
+        # Down the left
+        elif(victory == 3):
+            self.canvas.create_line(150, 60, 150, 640, width=15)
+        # Down the middle
+        elif(victory == 4):
+            self.canvas.create_line(350, 60, 350, 640, width=15)
+        # Down the right
+        elif(victory == 5):
+            self.canvas.create_line(550, 60, 550, 640, width=15)
+        # Diagonal right to left
+        elif(victory == 6):
+            self.canvas.create_line(60, 60, 640, 640, width=15)
+        # Diagonal left to right
+        elif(victory == 7):
+            self.canvas.create_line(60, 640, 640, 60, width=15)
+
+#====================================================================================================
+    #DEBUGGING ONLY
+    def printStats(self):
+
+        scLoc = 0
+        gcLoc = 0
+        gcCheck = 0
+
+        print("Single Cells:")
+        for i in range(3):
+            print '+-----------------------+'
+            for j in range(3):
+                for k in range(3):
+                    print "|",
+                    print self.singleCells[gcLoc][scLoc], self.singleCells[gcLoc][scLoc + 1],\
+                        self.singleCells[gcLoc][scLoc + 2],
+                    gcLoc += 1
+                    if j == 2:
+                        gcCheck += 1
+                scLoc += 3
+                gcLoc = gcCheck
+                print "|"
+            scLoc = 0
+        print '+-----------------------+'
+
+        count = 0
+        print("Game Cells:")
+        print("+-------+")
+        for i in range(3):
+            print("|"),
+            for j in range(3):
+                print(self.gameCells[count]),
+                count += 1
+            print('|')
+        print("+-------+")
+        print '*==============================*'
+
