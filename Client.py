@@ -7,7 +7,8 @@
 from tkinter import *
 from tkinter import messagebox
 from PIL import Image, ImageTk
-import socket
+from socket import *
+from U3T_Game import *
 
 class Client(Frame):
 
@@ -17,47 +18,60 @@ class Client(Frame):
         self.primaryServerPort = 1234
         self.primaryServerHost = '123.123.123'
 
-
         # create main frame
         mainFrame = Frame(master, width=700, height=700)
         mainFrame.pack()
 
+        # img = PhotoImage(master=self.canvas, file="imageXO.gif", width=60, height=60)
+
         # create title label from image
-        titleImage = Image.open('title.jpg')
-        titlePhoto = ImageTk.PhotoImage(titleImage)
+        titlePhoto = PhotoImage(file='title.gif')
         titleLabel = Label(mainFrame, image=titlePhoto)
         titleLabel.image = titlePhoto
         titleLabel.pack()
 
         # create join button
-        joinImage = Image.open('join.jpg')
-        joinPhoto = ImageTk.PhotoImage(joinImage)
+        joinPhoto = PhotoImage(file='join.gif')
         joinButton = Button(mainFrame, image=joinPhoto, command=lambda: self.join())
         joinButton.image = joinPhoto
         joinButton.pack()
 
         # create create button
-        createImage = Image.open('create.jpg')
-        createPhoto = ImageTk.PhotoImage(createImage)
+        createPhoto = PhotoImage(file='create.gif')
         createButton = Button(mainFrame, image=createPhoto, command=lambda: self.create())
         createButton.image = createPhoto
         createButton.pack()
 
         # create exit button
-        exitImage = Image.open('exit.jpg')
-        exitPhoto = ImageTk.PhotoImage(exitImage)
+        exitPhoto = PhotoImage(file='exit.gif')
         exitButton = Button(mainFrame, image=exitPhoto, command=lambda: self.close(self.master))
         exitButton.image = exitPhoto
         exitButton.pack()
 
     # join game
     def join(self):
+
         window = Toplevel()
+        game = U3T_Game(window)
+
+        s = socket(AF_INET, SOCK_STREAM)
+        s.connect(('127.0.0.1', 1899))
+
+        self.gameOn = True;
+
+        while(self.gameOn):
+            msg = str(s.recv(1024), 'utf-8')
+            print(msg)
+            s.send(bytes('Goodbye', 'utf-8'))
+
+        s.close()
+
+        '''
         window.title('Select a game to join')
 
         listbox = Listbox(window)
         listbox.pack()
-
+        '''
         '''
         # request game list from primary server
         s = socket.socket()
@@ -68,6 +82,7 @@ class Client(Frame):
         s.close()
         '''
 
+        '''
         for item in ['Game 1', 'Game 2', 'Game 3', 'Game 4', 'Game 5']:
             listbox.insert(END, item)
 
@@ -76,6 +91,7 @@ class Client(Frame):
 
         closeButton = Button(window, text='Close', command=lambda: self.close(window))
         closeButton.pack()
+        '''
 
     # join a game. Become the client.
     def client(self, window):
@@ -122,14 +138,16 @@ class Client(Frame):
     # start a new game
     def create(self):
         # new window for game. First will wait for a connection from new player
+
         window = Toplevel()
-        window.title('U3T: Ultimate Tic-Tac-Toe game')
+
+        '''
         waitingLabel = Label(window, text='Waiting for player')
         waitingLabel.pack()
 
         closeButton = Button(window, text='Close', command=lambda: self.close(window))
         closeButton.pack()
-
+        '''
         '''
         # send information to primary server the local host and port number
         s = socket.socket()
@@ -142,19 +160,34 @@ class Client(Frame):
         s.close()
         '''
 
-
-        # messagebox.showinfo(title='Waiting...' ,message='Waiting for player')
+        game = U3T_Game(window)
 
         # become the server/host for a new game
-        host = socket.gethostname()
+        #messagebox.showinfo(title='Waiting', message='Waiting for player')
         port = 1899
-        s = socket.socket()
-        s.bind((host, port))
+        s = socket(AF_INET, SOCK_STREAM)
+        s.bind(('', port))
         s.listen(5)
 
-        c, addr = s.accept()
-        messagebox.showinfo(title='Connected', message='Connected')
+        self.gameOn = True
 
+        while(self.gameOn):
+            c, addr = s.accept()
+
+            coord = game.move()
+
+            print(coord[0], coord[1])
+
+            '''
+            c.send(bytes('Hello', 'utf-8'))
+            msg = str(c.recv(1024), 'utf-8')
+            print(msg)
+            '''
+
+        c.close()
+
+
+        '''
         self.gameOn = True;
 
         waitingLabel.config(text='Game is going on')
@@ -174,6 +207,7 @@ class Client(Frame):
         # game is over
         c.close()
         window.destroy()
+        '''
 
     # exit/close window
     def close(self, frame):

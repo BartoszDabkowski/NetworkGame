@@ -1,6 +1,6 @@
 __author__ = 'Bartosz'
 
-from Tkinter import *
+from tkinter import *
 import time
 
 class U3T_Game:
@@ -12,7 +12,7 @@ class U3T_Game:
         self.singleCells = [['~' for x in range(9)] for y in range(9)]
         self.initializeGame()
         self.player = 'X'
-
+        self.testCoord = []
 
 #====================================================================================================
 
@@ -20,9 +20,9 @@ class U3T_Game:
         self.canvas.pack()
         self.drawGameBoard()
 
-        img = PhotoImage(file="imageXO.gif", width=60, height=60)
+        img = PhotoImage(master=self.canvas, file="imageXO.gif", width=55, height=55)
         bigCells = [50, 250, 450]
-        smallCells = [0, (200 / 3), (200 / 3) * 2]
+        smallCells = [0, (200 / 3) + 4, (200 / 3) * 2 + 4]
 
         gcLoc = 0
         scLoc = 0
@@ -84,21 +84,26 @@ class U3T_Game:
             self.singleCells[gcLoc][scLoc] = self.player
             self.drawScShape(self.player, coord)
             self.determineGameCellWinner(gcLoc)
-            #self.freezeCells(scLoc)                    Uncomment this and comment NETWORKING to fix
+            self.freezeCells(scLoc)                    #Uncomment this and comment NETWORKING to fix
             self.determineWinner()
             self.printStats()
             time.sleep(1)
             #------NETWORKING------#
             ####################################
-            #self.freezeCells('!') #'!' for NETWORKING
+            self.freezeCells('!') #'!' for NETWORKING
             coordinates = []
             gcLoc = int(input('Enter gcLoc: '))
             scLoc = int(input('Enter scLoc: '))
             coordinates.append(gcLoc)
             coordinates.append(scLoc)
-            print coordinates[0], coordinates[1]
+            print(coordinates[0], coordinates[1])
             self.receiveCoord(coordinates)
             ####################################
+
+            self.testCoord = [gcLoc, scLoc]
+
+    def move(self):
+        return self.testCoord
 
 #====================================================================================================
     #______NETWORKING_______
@@ -106,7 +111,7 @@ class U3T_Game:
         gcLoc = coord[0]
         scLoc = coord[1]
 
-        print gcLoc, scLoc
+        print(gcLoc, scLoc)
         self.scButtons[gcLoc][scLoc][0].destroy()
         self.singleCells[gcLoc][scLoc] = self.player
         self.drawScShape(self.player, coord)
@@ -385,20 +390,20 @@ class U3T_Game:
 
         print("Single Cells:")
         for i in range(3):
-            print '+-----------------------+'
+            print('+-----------------------+')
             for j in range(3):
                 for k in range(3):
-                    print "|",
-                    print self.singleCells[gcLoc][scLoc], self.singleCells[gcLoc][scLoc + 1],\
-                        self.singleCells[gcLoc][scLoc + 2],
+                    print("|"),
+                    print(self.singleCells[gcLoc][scLoc], self.singleCells[gcLoc][scLoc + 1],\
+                        self.singleCells[gcLoc][scLoc + 2],)
                     gcLoc += 1
                     if j == 2:
                         gcCheck += 1
                 scLoc += 3
                 gcLoc = gcCheck
-                print "|"
+                print("|")
             scLoc = 0
-        print '+-----------------------+'
+        print('+-----------------------+')
 
         count = 0
         print("Game Cells:")
@@ -410,5 +415,5 @@ class U3T_Game:
                 count += 1
             print('|')
         print("+-------+")
-        print '*==============================*'
+        print('*==============================*')
 
