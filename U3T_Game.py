@@ -1,12 +1,18 @@
 __author__ = 'Bartosz'
 
 from tkinter import *
+from tkinter import messagebox
 import time
+from time import sleep
+from socket import *
+import select
 
 class U3T_Game:
 
-    def __init__(self, r):
+    def __init__(self, r, createOrJoin):
         self.canvas = Canvas(r, width=700, height=700)
+        self.createOrJoin = createOrJoin
+        self.gameOn = False
         self.gameCells = ['~' for x in range(9)]
         self.scButtons = [[[Label, 0, 0] for x in range(9)] for y in range(9)]
         self.singleCells = [['~' for x in range(9)] for y in range(9)]
@@ -19,6 +25,35 @@ class U3T_Game:
     def initializeGame(self):
         self.canvas.pack()
         self.drawGameBoard()
+
+        if(self.createOrJoin == 'create'):
+            messagebox.showinfo(title='Waiting', message='Waiting for player...')
+
+            self.player = 'X'
+
+            print('waiting')
+
+            # become a server and wait for a connection
+            port = 1899
+            sock = socket(AF_INET, SOCK_STREAM)
+            sock.bind(('', port))
+            sock.listen(5)
+
+            self.s, addr = sock.accept()
+            self.s.setblocking(0)
+            print('server: connected')
+
+            self.gameOn = True
+            self.highlightGameBoard(True)
+        else:
+            self.player = 'O'
+
+            self.s = socket(AF_INET, SOCK_STREAM)
+            self.s.connect(('127.0.0.1', 1899))
+            self.s.setblocking(0)
+            print('client: connected')
+
+            self.gameOn = True
 
         img = PhotoImage(master=self.canvas, file="imageXO.gif", width=55, height=55)
         bigCells = [50, 250, 450]
@@ -44,6 +79,13 @@ class U3T_Game:
                 gcLoc += 1
                 scLoc = 0
         gcLoc = 0
+
+        if(self.createOrJoin == 'join'):
+            self.freezeCells('!')
+            coordinates = []
+            coordinates = self.receiveMove()
+            print(coordinates[0], coordinates[1])
+            self.receiveCoord(coordinates)
 
 #====================================================================================================
 
@@ -88,22 +130,17 @@ class U3T_Game:
             self.determineWinner()
             self.printStats()
             time.sleep(1)
+            # send message
+            self.sendMove(gcLoc, scLoc)                 # Socket send code
+
             #------NETWORKING------#
             ####################################
             self.freezeCells('!') #'!' for NETWORKING
             coordinates = []
-            gcLoc = int(input('Enter gcLoc: '))
-            scLoc = int(input('Enter scLoc: '))
-            coordinates.append(gcLoc)
-            coordinates.append(scLoc)
+            coordinates = self.receiveMove()            # Socket receive code
             print(coordinates[0], coordinates[1])
             self.receiveCoord(coordinates)
             ####################################
-
-            self.testCoord = [gcLoc, scLoc]
-
-    def move(self):
-        return self.testCoord
 
 #====================================================================================================
     #______NETWORKING_______
@@ -183,6 +220,7 @@ class U3T_Game:
                 if self.gameCells[i] == '~':
                     self.gameCells[i] = '@'
                 self.highlightCellSection(False, i)
+            return
         ####################################
 
 
@@ -417,3 +455,18 @@ class U3T_Game:
         print("+-------+")
         print('*==============================*')
 
+    def gameOn(self):
+        return self.gameOn
+
+    def sendMove(self, gcLoc, scLoc):
+        msg = str(gcLoc) + " " + str(scLoc)
+        self.s.send(bytes(msg, 'utf-8'))
+
+    def receiveMove(self):
+        while 1:
+            ready = select.select([self.s], [], [])
+            if ready[0]:
+                msg = str(self.s.recv(1024), 'utf-8')
+                msg = msg.split()
+                coordinates = [int(msg[0]), int(msg[1])]
+                return coordinates

@@ -50,21 +50,9 @@ class Client(Frame):
 
     # join game
     def join(self):
-
         window = Toplevel()
-        game = U3T_Game(window)
+        game = U3T_Game(window, 'join')
 
-        s = socket(AF_INET, SOCK_STREAM)
-        s.connect(('127.0.0.1', 1899))
-
-        self.gameOn = True;
-
-        while(self.gameOn):
-            msg = str(s.recv(1024), 'utf-8')
-            print(msg)
-            s.send(bytes('Goodbye', 'utf-8'))
-
-        s.close()
 
         '''
         window.title('Select a game to join')
@@ -93,62 +81,22 @@ class Client(Frame):
         closeButton.pack()
         '''
 
-    # join a game. Become the client.
-    def client(self, window):
-        window.destroy()
-        window = Toplevel()
-        window.title('U3T: Ultimate Tic-Tac-Toe game')
-
-        '''
-        # request from primary server the hostname and port number
-        s = socket.socket()
-        s.connect((self.primaryServerHost, self.primaryServerPort))
-        s.send(b'gameinfo')
-        gameinfo = s.recv(1024)
-        s.close()
-        '''
-
-        # connect to server
-        host = socket.gethostname() # replace with info from server
-        port = 1899
-        s = socket.socket()
-        s.connect((host, port))
-
-        self.gameOn = True
-
-        gameLabel = Label(window, text='Game is going on')
-        closeButton = Button(window, text='Close', command=lambda: self.closeAndQuit(window, s))
-        gameLabel.pack()
-        closeButton.pack()
-
-        # game instance
-        while(self.gameOn):
-            s.send(bytes('test2', 'utf-8'))
-            data = str(s.recv(1024), 'utf-8')
-            print(data)
-
-            s.send(bytes('test3', 'utf-8'))
-            s.send(bytes('test4', 'utf-8'))
-            s.send(bytes('quit', 'utf-8'))
-            gameOn = False
-
-        s.close()
-        window.destroy()
-
     # start a new game
     def create(self):
-        # new window for game. First will wait for a connection from new player
-
+        # new window for game
         window = Toplevel()
+        game = U3T_Game(window, 'create')
+
 
         '''
-        waitingLabel = Label(window, text='Waiting for player')
-        waitingLabel.pack()
+        c, addr = s.accept()
 
-        closeButton = Button(window, text='Close', command=lambda: self.close(window))
-        closeButton.pack()
-        '''
-        '''
+        c.send(bytes('Hello', 'utf-8'))
+        msg = str(c.recv(1024), 'utf-8')
+        print(msg)
+
+        c.close()
+
         # send information to primary server the local host and port number
         s = socket.socket()
         s.connect((self.primaryServerHost, self.primaryServerPort))
@@ -158,55 +106,9 @@ class Client(Frame):
 
         s.send(host, " ", port)
         s.close()
-        '''
 
-        game = U3T_Game(window)
-
-        # become the server/host for a new game
-        #messagebox.showinfo(title='Waiting', message='Waiting for player')
-        port = 1899
-        s = socket(AF_INET, SOCK_STREAM)
-        s.bind(('', port))
-        s.listen(5)
-
-        self.gameOn = True
-
-        while(self.gameOn):
-            c, addr = s.accept()
-
-            coord = game.move()
-
-            print(coord[0], coord[1])
-
-            '''
-            c.send(bytes('Hello', 'utf-8'))
-            msg = str(c.recv(1024), 'utf-8')
-            print(msg)
-            '''
-
-        c.close()
-
-
-        '''
-        self.gameOn = True;
-
-        waitingLabel.config(text='Game is going on')
-        closeButton.config(command=lambda: self.closeAndQuit(window, c))
-
-        # game instance
-        while(self.gameOn):
-            c.send(bytes('test1', 'utf-8'))
-            data = str(c.recv(1024), 'utf-8')
-            waitingLabel.config(text=(data, " received"))
-
-            # if the other player quits we win
-            if data == 'quit':
-                messagebox.showinfo(title='Winner', message='You won!')
-                self.gameOn = False
-
-        # game is over
-        c.close()
-        window.destroy()
+        c.send(bytes('test1', 'utf-8'))
+        data = str(c.recv(1024), 'utf-8')
         '''
 
     # exit/close window
