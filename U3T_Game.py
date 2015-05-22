@@ -9,15 +9,17 @@ import select
 
 class U3T_Game:
 
-    def __init__(self, r, createOrJoin):
+    def __init__(self, r, createOrJoin, host, port):
+        self.r = r
         self.canvas = Canvas(r, width=700, height=700)
         self.createOrJoin = createOrJoin
         self.gameOn = False
+        self.host = host
+        self.port = port
         self.gameCells = ['~' for x in range(9)]
         self.scButtons = [[[Label, 0, 0] for x in range(9)] for y in range(9)]
         self.singleCells = [['~' for x in range(9)] for y in range(9)]
         self.initializeGame()
-        self.player = 'X'
         self.testCoord = []
 
 #====================================================================================================
@@ -29,14 +31,13 @@ class U3T_Game:
         if(self.createOrJoin == 'create'):
             messagebox.showinfo(title='Waiting', message='Waiting for player...')
 
-            self.player = 'X'
+            self.player = 'O'
 
             print('waiting')
 
             # become a server and wait for a connection
-            port = 1899
             sock = socket(AF_INET, SOCK_STREAM)
-            sock.bind(('', port))
+            sock.bind(('', self.port))
             sock.listen(5)
 
             self.s, addr = sock.accept()
@@ -44,16 +45,17 @@ class U3T_Game:
             print('server: connected')
 
             self.gameOn = True
-            self.highlightGameBoard(True)
+
         else:
-            self.player = 'O'
+            self.player = 'X'
 
             self.s = socket(AF_INET, SOCK_STREAM)
-            self.s.connect(('127.0.0.1', 1899))
+            self.s.connect((self.host, self.port))
             self.s.setblocking(0)
             print('client: connected')
 
             self.gameOn = True
+            self.highlightGameBoard(True)
 
         img = PhotoImage(master=self.canvas, file="imageXO.gif", width=55, height=55)
         bigCells = [50, 250, 450]
@@ -80,12 +82,13 @@ class U3T_Game:
                 scLoc = 0
         gcLoc = 0
 
-        if(self.createOrJoin == 'join'):
+        # create player is second to go. First freeze everything and receive first cord.
+        if(self.createOrJoin == 'create'):
             self.freezeCells('!')
-            coordinates = []
             coordinates = self.receiveMove()
             print(coordinates[0], coordinates[1])
             self.receiveCoord(coordinates)
+
 
 #====================================================================================================
 
@@ -129,9 +132,9 @@ class U3T_Game:
             self.freezeCells(scLoc)                    #Uncomment this and comment NETWORKING to fix
             self.determineWinner()
             self.printStats()
+            self.sendMove(gcLoc, scLoc)                 # Socket send code
             time.sleep(1)
             # send message
-            self.sendMove(gcLoc, scLoc)                 # Socket send code
 
             #------NETWORKING------#
             ####################################
@@ -470,3 +473,14 @@ class U3T_Game:
                 msg = msg.split()
                 coordinates = [int(msg[0]), int(msg[1])]
                 return coordinates
+
+    # exit/close window and quit the game
+    def closeAndQuit(self, frame, socket):
+        quit = messagebox.askokcancel(title='Quit?', message='Are you sure you want to quit?')
+
+        if quit == True:
+            self.gameOn = False
+            socket.send(bytes('quit', 'utf-8'))
+            frame.destroy()
+        else:
+            return

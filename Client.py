@@ -4,10 +4,6 @@
 # Client.py
 # Program for the game, connection to server, and P2P connection
 
-from tkinter import *
-from tkinter import messagebox
-from PIL import Image, ImageTk
-from socket import *
 from U3T_Game import *
 
 class Client(Frame):
@@ -21,8 +17,6 @@ class Client(Frame):
         # create main frame
         mainFrame = Frame(master, width=700, height=700)
         mainFrame.pack()
-
-        # img = PhotoImage(master=self.canvas, file="imageXO.gif", width=60, height=60)
 
         # create title label from image
         titlePhoto = PhotoImage(file='title.gif')
@@ -50,82 +44,77 @@ class Client(Frame):
 
     # join game
     def join(self):
-        window = Toplevel()
-        game = U3T_Game(window, 'join')
+        joinWindow = Toplevel()
+        joinWindow.title('Select a game to join')
 
+        scrollbar = Scrollbar(joinWindow, orient=VERTICAL)
+        listbox = Listbox(joinWindow, yscrollcommand=scrollbar.set)
+        scrollbar.config(command=listbox.yview)
+        scrollbar.pack(side=RIGHT, fill=Y)
+        listbox.pack(side=LEFT, fill=BOTH, expand=1)
 
-        '''
-        window.title('Select a game to join')
-
-        listbox = Listbox(window)
-        listbox.pack()
-        '''
-        '''
-        # request game list from primary server
-        s = socket.socket()
+        # connect to primary server and ask for game list
+        s = socket(AF_INET, SOCK_STREAM)
         s.connect((self.primaryServerHost, self.primaryServerPort))
-        s.send(b'list')
-        list = []
-        s.recv(list)
+        s.send(bytes('list', 'utf-8'))
+        msg = s.recv(4096)
+        msg.split()
         s.close()
-        '''
 
-        '''
-        for item in ['Game 1', 'Game 2', 'Game 3', 'Game 4', 'Game 5']:
-            listbox.insert(END, item)
+        # creates a selectable list of games
+        for game in msg:
+            listbox.insert(END, game)
 
-        joinButton = Button(window, text='Join', command=lambda: self.client(window))
+        # join selected game
+        joinButton = Button(joinWindow, text='Join', command=lambda: self.joinGame(listbox.get(listbox.curselection()), joinWindow))
         joinButton.pack()
 
-        closeButton = Button(window, text='Close', command=lambda: self.close(window))
+        # close window
+        closeButton = Button(joinWindow, text='Close', command=lambda: self.close(joinWindow))
         closeButton.pack()
-        '''
+
+    # join selected game
+    def joinGame(self, selectedGame, joinWindow):
+        # connect to primary server and send the game ID
+        s = socket(AF_INET, SOCK_STREAM)
+        s.connect((self.primaryServerHost, self.primaryServerPort))
+        s.send(bytes(selectedGame[0], 'utf-8'))
+        # receive the host and port from primary server
+        msg = s.recv(1024)
+        msg.split()
+
+        # close the join window
+        joinWindow.destroy()
+
+        # new window for game
+        gameWindow = Toplevel()
+        game = U3T_Game(gameWindow, 'join', msg[0], int(msg[1]))
 
     # start a new game
     def create(self):
-        # new window for game
-        window = Toplevel()
-        game = U3T_Game(window, 'create')
-
-
-        '''
-        c, addr = s.accept()
-
-        c.send(bytes('Hello', 'utf-8'))
-        msg = str(c.recv(1024), 'utf-8')
-        print(msg)
-
-        c.close()
-
-        # send information to primary server the local host and port number
-        s = socket.socket()
+        # send primary server ip address and port number
+        print('connecting to primary server')
+        s = socket(AF_INET, SOCK_STREAM)
         s.connect((self.primaryServerHost, self.primaryServerPort))
-
+        print('sending ip and port')
         host = socket.gethostname()
         port = 1899
+        msg = host + " " + str(port)
+        s.send(bytes(msg, 'utf-8'))
 
-        s.send(host, " ", port)
+        # receive game ID from primary server
+        gameID = str(self.s.recv(1024), 'utf-8')
+        print('Game ID = ' + gameID)
         s.close()
 
-        c.send(bytes('test1', 'utf-8'))
-        data = str(c.recv(1024), 'utf-8')
-        '''
+        # new window for game
+        gameWindow = Toplevel()
+        gameWindow.title('You are in game: ' + gameID)
+        game = U3T_Game(gameWindow, 'create', host, port)
 
     # exit/close window
     def close(self, frame):
         frame.destroy()
-
-    # exit/close window and quit the game
-    def closeAndQuit(self, frame, socket):
-        quit = messagebox.askokcancel(title='Quit?', message='Are you sure you want to quit?')
-
-        if quit == True:
-            self.gameOn = False
-            socket.send(bytes('quit', 'utf-8'))
-            frame.destroy()
-        else:
-            return
-
 
 # Executable section.
 if __name__ == '__main__':
