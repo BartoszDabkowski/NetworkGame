@@ -36,7 +36,7 @@ current.name = 'Game ' + str(current.ID)
 # print game list
 def print_game_list():
     for game in game_list:
-        print '{0:1d} {1:10s} {2:20s} {3:20s}'.format(game.ID, game.name, game.creator, game.player)
+        print('{0:1d} {1:10s} {2:20s} {3:20s}'.format(game.ID, game.name, game.creator, game.player))
 
 #print_game_list()
 
@@ -44,13 +44,13 @@ serverPort = 12000
 serverSocket = socket(AF_INET, SOCK_STREAM)
 serverSocket.bind(('', serverPort))
 serverSocket.listen(5)
-print'The game server is ready to receive'
+print('The game server is ready to receive')
 title = 0
 
 # keep looping
 while 1:
     if title == 0:
-        print '{0:1s} {1:10s} {2:20s} {3:20s}'.format('ID', 'NAME', 'CREATOR', 'PLAYER')
+        print('{0:1s} {1:10s} {2:20s} {3:20s}'.format('ID', 'NAME', 'CREATOR', 'PLAYER'))
         title += 1
 
     connectionSocket, addr = serverSocket.accept()
@@ -77,11 +77,11 @@ while 1:
     elif request == 'join':
 
         for game in game_list:
-            if game.ID == string.atoi(gameID):
+            if game.ID == str(gameID):
                 #if pair exists
                 if game.player != 'Waiting':
                     connectionSocket.send('Game Not Available')
-                    print'ERROR: Game Not Available'
+                    print('ERROR: Game Not Available')
                 else:
 
                     # add player addr to the game list
@@ -99,14 +99,14 @@ while 1:
 
         # remove entry from game list
         for game in game_list:
-            if game.ID == string.atoi(gameID):
+            if game.ID == str(gameID):
                 game_list.remove(game)
         print_game_list()
 
         response = 'result updated'
         connectionSocket.send(response)
 
-    print 'msg sent'
+    print('msg sent')
 
     if request == 'join' or request == 'end':
         connectionSocket.close()

@@ -16,7 +16,7 @@ if option == 'create':
     clientSocket.send('create')
     response = clientSocket.recv(1024)
 
-    print'From Server:', response
+    print('From Server:', response)
 
     while 1:
         response = clientSocket.recv(1024)
@@ -37,7 +37,7 @@ elif option == 'join':
     clientSocket.send(request)
     creatorID = clientSocket.recv(1024)
 
-    print'From Server:', creatorID
+    print('From Server:', creatorID)
     clientSocket.close()
 
 # creator contacts server to send game result
@@ -53,8 +53,8 @@ elif option == 'end':
     request = 'end_' + str(gameID)
     clientSocket.send(request)
     response = clientSocket.recv(1024)
-    print'From Server:', response
+    print('From Server:', response)
     clientSocket.close()
 
 else:
-    print 'invalid input'
+    print('invalid input')
