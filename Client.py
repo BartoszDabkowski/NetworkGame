@@ -11,8 +11,8 @@ class Client(Frame):
     def __init__(self, master):
         Frame.__init__(self, master)
         self.master    = master
-        self.primaryServerPort = 1234
-        self.primaryServerHost = '123.123.123'
+        self.primaryServerPort = 12000
+        self.primaryServerHost = '127.0.0.1'
 
         # create main frame
         mainFrame = Frame(master, width=700, height=700)
@@ -56,13 +56,14 @@ class Client(Frame):
         # connect to primary server and ask for game list
         s = socket(AF_INET, SOCK_STREAM)
         s.connect((self.primaryServerHost, self.primaryServerPort))
-        s.send(bytes('list', 'utf-8'))
+        s.send('list')
         msg = s.recv(4096)
         msg.split()
         s.close()
 
         # creates a selectable list of games
         for game in msg:
+            game = game
             listbox.insert(END, game)
 
         # join selected game
@@ -78,39 +79,46 @@ class Client(Frame):
         # connect to primary server and send the game ID
         s = socket(AF_INET, SOCK_STREAM)
         s.connect((self.primaryServerHost, self.primaryServerPort))
-        s.send(bytes(selectedGame[0], 'utf-8'))
+        joinSelectedGame = 'join_' + selectedGame[0]
+        s.send(joinSelectedGame)
         # receive the host and port from primary server
-        msg = s.recv(1024)
-        msg.split()
+        msg = s.recv(4096)
+        first = msg.find('\'')
+        msg = msg[first + 1:]
+        ip = msg[:msg.find('\'')]
+
+        port = msg[msg.find(' ') + 1 : msg.find(')')]
+
+        print ('connecting to: ', ip, port)
 
         # close the join window
         joinWindow.destroy()
 
         # new window for game
         gameWindow = Toplevel()
-        game = U3T_Game(gameWindow, 'join', msg[0], int(msg[1]))
+        game = U3T_Game(gameWindow, 'join', ip, int(port))
 
     # start a new game
     def create(self):
         # send primary server ip address and port number
         print('connecting to primary server')
         s = socket(AF_INET, SOCK_STREAM)
+        print('socket created')
         s.connect((self.primaryServerHost, self.primaryServerPort))
         print('sending ip and port')
-        host = socket.gethostname()
-        port = 1899
-        msg = host + " " + str(port)
-        s.send(bytes(msg, 'utf-8'))
+        host = ''
+        port = s.getsockname()[1]
+        s.send('create')
 
         # receive game ID from primary server
-        gameID = str(self.s.recv(1024), 'utf-8')
+        gameID = s.recv(1024)
         print('Game ID = ' + gameID)
         s.close()
 
         # new window for game
         gameWindow = Toplevel()
         gameWindow.title('You are in game: ' + gameID)
-        game = U3T_Game(gameWindow, 'create', host, port)
+        game = U3T_Game(gameWindow, 'create', host, int(port))
 
     # exit/close window
     def close(self, frame):

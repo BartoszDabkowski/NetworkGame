@@ -1,9 +1,8 @@
 __author__ = 'Bartosz'
 
-from tkinter import *
-from tkinter import messagebox
+from Tkinter import *
 import time
-from time import sleep
+import tkMessageBox
 from socket import *
 import select
 
@@ -29,7 +28,7 @@ class U3T_Game:
         self.drawGameBoard()
 
         if(self.createOrJoin == 'create'):
-            messagebox.showinfo(title='Waiting', message='Waiting for player...')
+            tkMessageBox.showinfo(title='Waiting', message='Waiting for player...')
 
             self.player = 'O'
 
@@ -463,24 +462,24 @@ class U3T_Game:
 
     def sendMove(self, gcLoc, scLoc):
         msg = str(gcLoc) + " " + str(scLoc)
-        self.s.send(bytes(msg, 'utf-8'))
+        self.s.send(msg)
 
     def receiveMove(self):
         while 1:
             ready = select.select([self.s], [], [])
             if ready[0]:
-                msg = str(self.s.recv(1024), 'utf-8')
+                msg = self.s.recv(1024)
                 msg = msg.split()
                 coordinates = [int(msg[0]), int(msg[1])]
                 return coordinates
 
     # exit/close window and quit the game
     def closeAndQuit(self, frame, socket):
-        quit = messagebox.askokcancel(title='Quit?', message='Are you sure you want to quit?')
+        quit = tkMessageBox.askokcancel(title='Quit?', message='Are you sure you want to quit?')
 
         if quit == True:
             self.gameOn = False
-            socket.send(bytes('quit', 'utf-8'))
+            socket.send('quit')
             frame.destroy()
         else:
             return
