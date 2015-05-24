@@ -24,6 +24,12 @@ class Client(Frame):
         titleLabel.image = titlePhoto
         titleLabel.pack()
 
+        # create top score button
+        topPhoto = PhotoImage(file='top.gif')
+        topButton = Button(mainFrame, image=topPhoto, command=lambda: self.top())
+        topButton.image = topPhoto
+        topButton.pack()
+
         # create join button
         joinPhoto = PhotoImage(file='join.gif')
         joinButton = Button(mainFrame, image=joinPhoto, command=lambda: self.join())
@@ -41,6 +47,44 @@ class Client(Frame):
         exitButton = Button(mainFrame, image=exitPhoto, command=lambda: self.close(self.master))
         exitButton.image = exitPhoto
         exitButton.pack()
+
+    # top score
+    def top(self):
+        topWindow = Toplevel()
+        topWindow.title('Top Scores')
+
+        topLabel = Label(topWindow, text='Top Scores', font='Georgia 36')
+        topLabel2 = Label(topWindow, text='Ordered by number of wins')
+        topTitle = Label(topWindow, text='IP Address'.ljust(20) + 'Wins'.rjust(5))
+        topLabel.pack()
+        topLabel2.pack()
+        topTitle.pack()
+
+        '''
+        # connect to primary server and ask for top score list
+        s = socket(AF_INET, SOCK_STREAM)
+        s.connect((self.primaryServerHost, self.primaryServerPort))
+        s.send('top')
+        topList = s.recv(4096)
+        topList.split()
+        s.close()
+        '''
+
+        # for testing
+        topList = ['123.123.123', '1', '123.123.123', '2', '123.123.123', '3']
+
+        ip = 0
+        wins = 1
+        for score in range(0, 3):
+            scoreText = (topList[ip].ljust(20) + topList[wins].rjust(5))
+            scoreLabel = Label(topWindow, text=scoreText)
+            scoreLabel.pack()
+            ip += 2
+            wins += 2
+
+        # close window
+        closeButton = Button(topWindow, text='Close', command=lambda: self.close(topWindow))
+        closeButton.pack()
 
     # join game
     def join(self):
