@@ -12,7 +12,7 @@ class Client(Frame):
         Frame.__init__(self, master)
         self.master    = master
         self.primaryServerPort = 12000
-        self.primaryServerHost = '127.0.0.1'
+        self.primaryServerHost = 'uw1-320-14.uwb.edu'
 
         # create main frame
         mainFrame = Frame(master, width=700, height=700)
@@ -107,7 +107,7 @@ class Client(Frame):
 
         # creates a selectable list of games
         for game in msg:
-            game = game
+            game = 'Game ' + game
             listbox.insert(END, game)
 
         # join selected game
@@ -123,14 +123,19 @@ class Client(Frame):
         # connect to primary server and send the game ID
         s = socket(AF_INET, SOCK_STREAM)
         s.connect((self.primaryServerHost, self.primaryServerPort))
-        joinSelectedGame = 'join_' + selectedGame[0]
+        # parse Game x to just x
+        selectedGame = selectedGame[5:]
+        print(selectedGame)
+
+        joinSelectedGame = 'join_' + selectedGame
         s.send(joinSelectedGame)
         # receive the host and port from primary server
         msg = s.recv(4096)
+
         first = msg.find('\'')
         msg = msg[first + 1:]
-        ip = msg[:msg.find('\'')]
 
+        ip = msg[:msg.find('\'')]
         port = msg[msg.find(' ') + 1 : msg.find(')')]
 
         print ('connecting to: ', ip, port)
@@ -150,14 +155,16 @@ class Client(Frame):
         print('socket created')
         s.connect((self.primaryServerHost, self.primaryServerPort))
         print('sending ip and port')
-        host = ''
-        port = s.getsockname()[1]
         s.send('create')
 
         # receive game ID from primary server
-        gameID = s.recv(1024)
-        print('Game ID = ' + gameID)
+        gameIDandPort = s.recv(1024)
+        print('Game ID and port = ' + gameIDandPort)
         s.close()
+
+        host = ''
+        port = gameIDandPort[gameIDandPort.find('_') + 1:]
+        gameID = gameIDandPort[:gameIDandPort.find('_')]
 
         # new window for game
         gameWindow = Toplevel()
