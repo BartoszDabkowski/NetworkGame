@@ -54,6 +54,14 @@ while 1:
         title += 1
 
     connectionSocket, addr = serverSocket.accept()
+
+    address = str(addr)
+    first = address.find('\'')
+    address = address[first + 1:]
+    ip = address[:address.find('\'')]
+    port = address[address.find(' ') + 1: address.find(')')]
+    print('ip and port: ', ip, port)
+
     print('accepted')
 
     request = connectionSocket.recv(1024)
@@ -67,13 +75,21 @@ while 1:
     if request == 'create':
 
         current = GamePair()
-        current.creator = addr
+        #current.creator = addr
         current.player = 'Waiting'
         game_list.append(current)
         newGameID += 1
         current.ID = newGameID
         current.name = 'Game ' + str(current.ID)
-        connectionSocket.send(str(current.ID))
+
+        port = str(int(port) + 1)
+
+        newAddr = '(' + '\'' + ip + '\', ' + port + ')'
+        current.creator = newAddr
+
+        respond = str(current.ID) + '_' + port
+
+        connectionSocket.send(respond)
         print_game_list()
 
     elif request == 'join':
@@ -112,7 +128,7 @@ while 1:
         list = ""
         for game in game_list[:-1]:
             if game.player == 'Waiting':
-                list += game.ID + ' '
+                list += str(game.ID) + ' '
         if game_list[len(game_list) - 1].player == 'Waiting':
             list += str(game_list[len(game_list) - 1].ID)
 
@@ -123,7 +139,6 @@ while 1:
 
     print 'msg sent'
 
-    #if request == 'join' or request == 'end':
     connectionSocket.close()
     print('closed')
 
