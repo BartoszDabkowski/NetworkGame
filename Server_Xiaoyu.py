@@ -1,9 +1,17 @@
 __author__ = 'Xiaoyu'
 from socket import *
 import string
+import random
 
 # initialize variables
 game_list = []
+score_board = []
+
+# single entry on score board
+class ScoreEntry:
+    def __init__(self):
+        self.player = ""
+        self.score = 0
 
 newGameID = 0
 
@@ -40,6 +48,10 @@ def print_game_list():
 
 #print_game_list()
 
+def print_score_board():
+    for entry in score_board[:10]:
+        print entry.player, entry.score
+
 serverPort = 12000
 serverSocket = socket(AF_INET, SOCK_STREAM)
 serverSocket.bind(('', serverPort))
@@ -75,14 +87,15 @@ while 1:
     if request == 'create':
 
         current = GamePair()
-        #current.creator = addr
         current.player = 'Waiting'
         game_list.append(current)
         newGameID += 1
         current.ID = newGameID
         current.name = 'Game ' + str(current.ID)
 
-        port = str(int(port) + 1)
+        #port = str(int(port) - 1)
+
+        port = str(random.randint(10000, 99999))
 
         newAddr = '(' + '\'' + ip + '\', ' + port + ')'
         current.creator = newAddr
@@ -114,15 +127,90 @@ while 1:
     elif request == 'end':
 
         # update game result
+        gameID, result = gameID.split(' ')
 
         # remove entry from game list
         for game in game_list:
             if game.ID == string.atoi(gameID):
+
+                if len(score_board) == 0:
+                    if result == '1':
+                        # add creator
+                        firstEntry = ScoreEntry()
+                        firstEntry.player = game.creator
+                        firstEntry.score += 1
+                        score_board.append(firstEntry)
+
+                        # add player
+                        secondEntry = ScoreEntry()
+                        secondEntry.player = game.player
+                        score_board.append(secondEntry)
+
+                    else:
+                        # add player
+                        firstEntry = ScoreEntry()
+                        firstEntry.player = game.player
+                        firstEntry.score += 1
+                        score_board.append(firstEntry)
+
+                        # add creator
+                        secondEntry = ScoreEntry()
+                        secondEntry.player = game.creator
+                        score_board.append(secondEntry)
+                else:
+
+                    creatorExist = 0
+                    playerExist = 0
+
+                    for entry in score_board:
+                        if entry.player == game.creator:
+                            creatorExist = 1
+                            if result == '1':
+                                entry.score += 1
+                        if entry.player == game.player:
+                            playerExist = 1
+                            if result == '0':
+                                entry.score += 1
+
+                    if creatorExist == 0:
+                        if result == '1':
+                            # add creator
+                            firstEntry = ScoreEntry()
+                            firstEntry.player = game.creator
+                            firstEntry.score += 1
+                            score_board.append(firstEntry)
+
+                        else:
+                            # add creator
+                            secondEntry = ScoreEntry()
+                            secondEntry.player = game.creator
+                            score_board.append(secondEntry)
+
+                    if playerExist == 0:
+                        if result == '0':
+                            # add player
+                            firstEntry = ScoreEntry()
+                            firstEntry.player = game.player
+                            firstEntry.score += 1
+                            score_board.append(firstEntry)
+
+                        else:
+                            # add player
+                            secondEntry = ScoreEntry()
+                            secondEntry.player = game.player
+                            score_board.append(secondEntry)
+
                 game_list.remove(game)
         print_game_list()
 
+        # sort score_board on key score
+        score_board.sort(key=lambda x : x.score, reverse = True)
+
+        print_score_board()
+
         response = 'result updated'
         connectionSocket.send(response)
+
     elif request == 'list':
 
         list = ""
@@ -135,7 +223,16 @@ while 1:
         connectionSocket.send(list)
         print_game_list()
 
+    elif request == 'top':
 
+        msg = ''
+        for entry in score_board[:-1]:
+            msg += str(entry.player) + ' ' + str(entry.score) + ' '
+
+        msg += str(score_board[len(score_board) - 1].player) + ' ' + str(score_board[len(score_board) - 1].score)
+
+        connectionSocket.send(msg)
+        print msg
 
     print 'msg sent'
 

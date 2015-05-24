@@ -12,6 +12,9 @@ if option == 'create':
     serverName = '127.0.0.1'
     serverPort = 12000
     clientSocket = socket(AF_INET, SOCK_STREAM)
+
+    #socket.port = 54299
+
     clientSocket.connect((serverName, serverPort))
     clientSocket.send('create')
     response = clientSocket.recv(1024)
@@ -51,11 +54,25 @@ elif option == 'end':
     clientSocket.connect((serverName, serverPort))
 
     gameID = 1
-    request = 'end_' + str(gameID)
+    request = 'end_' + str(gameID) + ' 1'
     clientSocket.send(request)
     response = clientSocket.recv(1024)
     print'From Server:', response
     clientSocket.close()
+
+elif option == 'top':
+
+    serverName = '127.0.0.1'
+    serverPort = 12000
+    clientSocket = socket(AF_INET, SOCK_STREAM)
+    clientSocket.connect((serverName, serverPort))
+
+    clientSocket.send('top')
+    response = clientSocket.recv(1024)
+    print'From Server:', response
+
+    clientSocket.close()
+
 
 else:
     print 'invalid input'
