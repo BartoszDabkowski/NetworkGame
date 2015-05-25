@@ -226,13 +226,18 @@ while 1:
     elif request == 'top':
 
         msg = ''
-        for entry in score_board[:-1]:
-            msg += str(entry.player) + ' ' + str(entry.score) + ' '
+        if(len(score_board) == 0):
+            msg = 'empty'
+            connectionSocket.send(msg)
+            print('No scores')
+        else:
+            for entry in score_board[:-1]:
+                msg += str(entry.player) + ' ' + str(entry.score) + ' '
 
-        msg += str(score_board[len(score_board) - 1].player) + ' ' + str(score_board[len(score_board) - 1].score)
+            msg += str(score_board[len(score_board) - 1].player) + ' ' + str(score_board[len(score_board) - 1].score)
 
-        connectionSocket.send(msg)
-        print msg
+            connectionSocket.send(msg)
+            print msg
 
     print 'msg sent'
 

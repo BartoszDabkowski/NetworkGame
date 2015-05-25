@@ -60,7 +60,6 @@ class Client(Frame):
         topLabel2.pack()
         topTitle.pack()
 
-        '''
         # connect to primary server and ask for top score list
         s = socket(AF_INET, SOCK_STREAM)
         s.connect((self.primaryServerHost, self.primaryServerPort))
@@ -68,19 +67,27 @@ class Client(Frame):
         topList = s.recv(4096)
         topList.split()
         s.close()
-        '''
 
         # for testing
-        topList = ['123.123.123', '1', '123.123.123', '2', '123.123.123', '3']
+        #topList = ['123.123.123', '1', '123.123.123', '2', '123.123.123', '3']
 
         ip = 0
         wins = 1
-        for score in range(0, 3):
-            scoreText = (topList[ip].ljust(20) + topList[wins].rjust(5))
-            scoreLabel = Label(topWindow, text=scoreText)
+        # check length of list. Only do top 10 or less
+        if(topList == 'empty'):
+            scoreLabel = Label(topWindow, text='[No scores yet]')
             scoreLabel.pack()
-            ip += 2
-            wins += 2
+        else:
+            if(len(topList) < 10):
+                x = len(topList)
+            else:
+                x = 10
+            for score in range(0, x):
+                scoreText = (topList[ip].ljust(20) + topList[wins].rjust(5))
+                scoreLabel = Label(topWindow, text=scoreText)
+                scoreLabel.pack()
+                ip += 2
+                wins += 2
 
         # close window
         closeButton = Button(topWindow, text='Close', command=lambda: self.close(topWindow))

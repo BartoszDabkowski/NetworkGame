@@ -2,10 +2,6 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="51835308-c0a0-4251-96cb-060fdf277ddf" name="Default" comment="">
-      <change type="DELETED" beforePath="$PROJECT_DIR$/create.jpg" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/exit.jpg" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/join.jpg" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/title.jpg" afterPath="" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/Client.py" afterPath="$PROJECT_DIR$/Client.py" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/Server_Xiaoyu.py" afterPath="$PROJECT_DIR$/Server_Xiaoyu.py" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
@@ -42,11 +38,11 @@
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="Server_Xiaoyu.py" pinned="false" current-in-tab="true">
+      <file leaf-file-name="Server_Xiaoyu.py" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/Server_Xiaoyu.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state vertical-scroll-proportion="0.69135803" vertical-offset="879" max-vertical-offset="3690">
-              <caret line="83" column="28" selection-start-line="83" selection-start-column="28" selection-end-line="83" selection-end-column="28" />
+            <state vertical-scroll-proportion="-12.222222" vertical-offset="3015" max-vertical-offset="3765">
+              <caret line="225" column="24" selection-start-line="225" selection-start-column="24" selection-end-line="225" selection-end-column="24" />
               <folding />
             </state>
           </provider>
@@ -55,8 +51,8 @@
       <file leaf-file-name="U3T_Game.py" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/U3T_Game.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state vertical-scroll-proportion="0.0" vertical-offset="0" max-vertical-offset="7350">
-              <caret line="473" column="16" selection-start-line="473" selection-start-column="16" selection-end-line="473" selection-end-column="16" />
+            <state vertical-scroll-proportion="0.0" vertical-offset="0" max-vertical-offset="7380">
+              <caret line="137" column="26" selection-start-line="137" selection-start-column="26" selection-end-line="137" selection-end-column="26" />
               <folding>
                 <element signature="e#24#45#0" expanded="true" />
               </folding>
@@ -64,11 +60,11 @@
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="Client.py" pinned="false" current-in-tab="false">
+      <file leaf-file-name="Client.py" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/Client.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state vertical-scroll-proportion="0.0" vertical-offset="1785" max-vertical-offset="2925">
-              <caret line="133" column="0" selection-start-line="133" selection-start-column="0" selection-end-line="133" selection-end-column="0" />
+            <state vertical-scroll-proportion="0.5984556" vertical-offset="705" max-vertical-offset="3030">
+              <caret line="78" column="29" selection-start-line="78" selection-start-column="29" selection-end-line="78" selection-end-column="29" />
               <folding />
             </state>
           </provider>
@@ -82,10 +78,10 @@
   <component name="IdeDocumentHistory">
     <option name="CHANGED_PATHS">
       <list>
-        <option value="$PROJECT_DIR$/U3T_Game.py" />
         <option value="$PROJECT_DIR$/Client_Xiaoyu.py" />
-        <option value="$PROJECT_DIR$/Client.py" />
+        <option value="$PROJECT_DIR$/U3T_Game.py" />
         <option value="$PROJECT_DIR$/Server_Xiaoyu.py" />
+        <option value="$PROJECT_DIR$/Client.py" />
       </list>
     </option>
   </component>
@@ -389,7 +385,7 @@
       <window_info id="Project" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" weight="0.17430556" sideWeight="0.5" order="0" side_tool="false" content_ui="combo" />
       <window_info id="Debug" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.4" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
       <window_info id="Python Console" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
-      <window_info id="Run" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" weight="0.3279503" sideWeight="0.5" order="2" side_tool="false" content_ui="tabs" />
+      <window_info id="Run" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.3279503" sideWeight="0.5" order="2" side_tool="false" content_ui="tabs" />
       <window_info id="Favorites" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="2" side_tool="true" content_ui="tabs" />
       <window_info id="Event Log" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="7" side_tool="true" content_ui="tabs" />
       <window_info id="Version Control" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
@@ -569,14 +565,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/Client_Xiaoyu.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.0" vertical-offset="480" max-vertical-offset="1260">
-          <caret line="32" column="0" selection-start-line="32" selection-start-column="0" selection-end-line="32" selection-end-column="0" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
     <entry file="file:///System/Library/Frameworks/Python.framework/Versions/2.7/lib/python2.7/lib-tk/Tkinter.py">
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="0.33333334" vertical-offset="48744" max-vertical-offset="57015">
@@ -585,28 +573,36 @@
         </state>
       </provider>
     </entry>
+    <entry file="file://$PROJECT_DIR$/Client_Xiaoyu.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.0" vertical-offset="480" max-vertical-offset="1260">
+          <caret line="32" column="0" selection-start-line="32" selection-start-column="0" selection-end-line="32" selection-end-column="0" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
     <entry file="file://$PROJECT_DIR$/U3T_Game.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.0" vertical-offset="0" max-vertical-offset="7350">
-          <caret line="473" column="16" selection-start-line="473" selection-start-column="16" selection-end-line="473" selection-end-column="16" />
+        <state vertical-scroll-proportion="0.0" vertical-offset="0" max-vertical-offset="7380">
+          <caret line="137" column="26" selection-start-line="137" selection-start-column="26" selection-end-line="137" selection-end-column="26" />
           <folding>
             <element signature="e#24#45#0" expanded="true" />
           </folding>
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/Client.py">
+    <entry file="file://$PROJECT_DIR$/Server_Xiaoyu.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.0" vertical-offset="1785" max-vertical-offset="2925">
-          <caret line="133" column="0" selection-start-line="133" selection-start-column="0" selection-end-line="133" selection-end-column="0" />
+        <state vertical-scroll-proportion="-12.222222" vertical-offset="3015" max-vertical-offset="3765">
+          <caret line="225" column="24" selection-start-line="225" selection-start-column="24" selection-end-line="225" selection-end-column="24" />
           <folding />
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/Server_Xiaoyu.py">
+    <entry file="file://$PROJECT_DIR$/Client.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.69135803" vertical-offset="879" max-vertical-offset="3690">
-          <caret line="83" column="28" selection-start-line="83" selection-start-column="28" selection-end-line="83" selection-end-column="28" />
+        <state vertical-scroll-proportion="0.5984556" vertical-offset="705" max-vertical-offset="3030">
+          <caret line="78" column="29" selection-start-line="78" selection-start-column="29" selection-end-line="78" selection-end-column="29" />
           <folding />
         </state>
       </provider>
