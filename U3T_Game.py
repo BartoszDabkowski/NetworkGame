@@ -26,9 +26,10 @@ class U3T_Game:
     def initializeGame(self):
         self.canvas.pack()
         self.drawGameBoard()
+        self.r.update()
 
+        # if you create you become the 'server'
         if(self.createOrJoin == 'create'):
-            tkMessageBox.showinfo(title='Waiting', message='Waiting for player...')
 
             self.player = 'O'
 
@@ -45,6 +46,7 @@ class U3T_Game:
 
             self.gameOn = True
 
+        # if you join then you will connect to a 'server'
         else:
             self.player = 'X'
 
@@ -131,8 +133,8 @@ class U3T_Game:
             self.freezeCells(scLoc)                    #Uncomment this and comment NETWORKING to fix
             self.determineWinner()
             self.printStats()
+            self.r.update()
             self.sendMove(gcLoc, scLoc)                 # Socket send code
-            time.sleep(1)
             # send message
 
             #------NETWORKING------#
