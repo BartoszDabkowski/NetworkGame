@@ -132,6 +132,8 @@ class Client(Frame):
         # receive the host and port from primary server
         msg = s.recv(4096)
 
+        print(msg)
+
         first = msg.find('\'')
         msg = msg[first + 1:]
 

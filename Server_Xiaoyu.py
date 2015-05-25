@@ -77,7 +77,7 @@ while 1:
     print('accepted')
 
     request = connectionSocket.recv(1024)
-    print (request)
+    print ('Request:', request)
 
     # parse if it is join request/end request
     if request.find('_') > 0:
@@ -95,7 +95,7 @@ while 1:
 
         #port = str(int(port) - 1)
 
-        port = str(random.randint(10000, 99999))
+        port = str(random.randint(10000, 65535))
 
         newAddr = '(' + '\'' + ip + '\', ' + port + ')'
         current.creator = newAddr
@@ -108,18 +108,18 @@ while 1:
     elif request == 'join':
 
         for game in game_list:
-            if game.ID == string.atoi(gameID):
+            if str(game.ID) == gameID:
                 #if pair exists
                 if game.player != 'Waiting':
                     connectionSocket.send('Game Not Available')
                     print'ERROR: Game Not Available'
                 else:
-
                     # add player addr to the game list
                     game.player = addr
 
                     # send creator addr back to player
                     response = str(game.creator)
+                    print(game.player, 'joining game:', response)
                     connectionSocket.send(response)
                     print_game_list()
                     break
@@ -131,7 +131,7 @@ while 1:
 
         # remove entry from game list
         for game in game_list:
-            if game.ID == string.atoi(gameID):
+            if game.ID == str(gameID):
 
                 if len(score_board) == 0:
                     if result == '1':
