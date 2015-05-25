@@ -77,7 +77,7 @@ while 1:
     print('accepted')
 
     request = connectionSocket.recv(1024)
-    print ('Request:', request)
+    print (request)
 
     # parse if it is join request/end request
     if request.find('_') > 0:
@@ -95,12 +95,12 @@ while 1:
 
         #port = str(int(port) - 1)
 
-        port = str(random.randint(10000, 65535))
+        port = str(random.randint(10000, 99999))
 
         newAddr = '(' + '\'' + ip + '\', ' + port + ')'
         current.creator = newAddr
 
-        respond = str(current.ID) + '_' + port
+        respond = str(current.ID) + '_' + port + " "
 
         connectionSocket.send(respond)
         print_game_list()
@@ -108,18 +108,18 @@ while 1:
     elif request == 'join':
 
         for game in game_list:
-            if str(game.ID) == gameID:
+            if game.ID == string.atoi(gameID):
                 #if pair exists
                 if game.player != 'Waiting':
                     connectionSocket.send('Game Not Available')
                     print'ERROR: Game Not Available'
                 else:
+
                     # add player addr to the game list
                     game.player = addr
 
                     # send creator addr back to player
                     response = str(game.creator)
-                    print(game.player, 'joining game:', response)
                     connectionSocket.send(response)
                     print_game_list()
                     break
@@ -131,7 +131,7 @@ while 1:
 
         # remove entry from game list
         for game in game_list:
-            if game.ID == str(gameID):
+            if game.ID == string.atoi(gameID):
 
                 if len(score_board) == 0:
                     if result == '1':
@@ -226,18 +226,13 @@ while 1:
     elif request == 'top':
 
         msg = ''
-        if(len(score_board) == 0):
-            msg = 'empty'
-            connectionSocket.send(msg)
-            print('No scores')
-        else:
-            for entry in score_board[:-1]:
-                msg += str(entry.player) + ' ' + str(entry.score) + ' '
+        for entry in score_board[:-1]:
+            msg += str(entry.player) + ' ' + str(entry.score) + ' '
 
-            msg += str(score_board[len(score_board) - 1].player) + ' ' + str(score_board[len(score_board) - 1].score)
+        msg += str(score_board[len(score_board) - 1].player) + ' ' + str(score_board[len(score_board) - 1].score)
 
-            connectionSocket.send(msg)
-            print msg
+        connectionSocket.send(msg)
+        print msg
 
     print 'msg sent'
 
