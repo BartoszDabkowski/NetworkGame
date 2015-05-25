@@ -154,7 +154,8 @@ class Client(Frame):
 
         # new window for game
         gameWindow = Toplevel()
-        game = U3T_Game(gameWindow, 'join', ip, int(port))
+        gameWindow.geometry('+500+400')
+        game = U3T_Game(gameWindow, 'join', ip, int(port), self.primaryServerHost, self.primaryServerPort)
 
     # start a new game
     def create(self):
@@ -177,8 +178,10 @@ class Client(Frame):
 
         # new window for game
         gameWindow = Toplevel()
+        gameWindow.geometry('+500+400')
         gameWindow.title('You are in game: ' + gameID)
-        game = U3T_Game(gameWindow, 'create', host, int(port))
+
+        game = U3T_Game(gameWindow, 'create', host, int(port), self.primaryServerHost, self.primaryServerPort)
 
     # exit/close window
     def close(self, frame):
