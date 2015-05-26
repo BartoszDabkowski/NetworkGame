@@ -12,7 +12,7 @@ class Client(Frame):
         Frame.__init__(self, master)
         self.master    = master
         self.primaryServerPort = 12000
-        self.primaryServerHost = 'uw1-320-07.uwb.edu'
+        self.primaryServerHost = 'uw1-320-12.uwb.edu'
 
         # create main frame
         mainFrame = Frame(master, width=700, height=700)

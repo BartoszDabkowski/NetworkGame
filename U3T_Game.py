@@ -12,7 +12,6 @@ class U3T_Game:
         self.r = r
         self.canvas = Canvas(r, width=700, height=700)
         self.createOrJoin = createOrJoin
-        self.gameOn = False
         self.host = host
         self.port = port
         self.primaryServerHost = primaryServerHost
@@ -31,9 +30,9 @@ class U3T_Game:
         if(self.createOrJoin == 'create'):
             # waiting for player
             waitingLabel = Label(self.r, text=('Game ' + self.gameID + ': Waiting for player...'), font='Georgia 36', pady=10)
-            cancelButton = Button(self.r, text='Cancel', command=lambda: self.cancelCreate())
+            #cancelButton = Button(self.r, text='Cancel', command=lambda: self.cancelCreate())
             waitingLabel.pack()
-            cancelButton.pack()
+            #cancelButton.pack()
             self.r.update()
 
             self.player = 'O'
@@ -50,9 +49,7 @@ class U3T_Game:
             print('server: connected')
 
             waitingLabel.destroy()
-            cancelButton.destroy()
-
-            self.gameOn = True
+            #cancelButton.destroy()
 
         # if you join then you will connect to a 'server'
         else:
@@ -63,7 +60,6 @@ class U3T_Game:
             self.s.setblocking(0)
             print('client: connected')
 
-            self.gameOn = True
 
         # draw the board
         self.canvas.pack()
@@ -95,7 +91,7 @@ class U3T_Game:
                 scLoc = 0
         gcLoc = 0
 
-        forfeitButton = Button(self.canvas,text='Forfeit', command=lambda: self.drawEndGameMessage('X'))
+        forfeitButton = Button(self.canvas,text='Forfeit', command=lambda: self.forfeit())
         forfeitButton.place(x=325, y=675)
 
         # create player is second to go. First freeze everything and receive first cord.
@@ -110,6 +106,13 @@ class U3T_Game:
 
 
 #====================================================================================================
+
+    def forfeit(self):
+        gameResult = 'forfeit'
+        self.s.send(gameResult)
+        self.s.close()
+        self.freezeCells('!')
+        self.drawEndGameMessage('O')
 
     def drawGameBoard(self):
         buf = 700 / 14
@@ -149,10 +152,13 @@ class U3T_Game:
             self.drawScShape(self.player, coord)
             self.determineGameCellWinner(gcLoc)
             self.freezeCells(scLoc)                    #Uncomment this and comment NETWORKING to fix
-            self.determineWinner()
+            gameCheck = self.determineWinner()
             self.printStats()
             self.r.update()
             self.sendMove(gcLoc, scLoc)                 # Socket send code
+            if(gameCheck):
+                self.s.close()
+                return
             # send message
 
             #------NETWORKING------#
@@ -160,6 +166,8 @@ class U3T_Game:
             self.freezeCells('!') #'!' for NETWORKING
             coordinates = []
             coordinates = self.receiveMove()            # Socket receive code
+            if(coordinates == [-1, -1]):
+                return
             print(coordinates[0], coordinates[1])
             self.receiveCoord(coordinates)
             ####################################
@@ -502,8 +510,6 @@ class U3T_Game:
         print("+-------+")
         print('*==============================*')
 
-    def gameOn(self):
-        return self.gameOn
 
     def sendMove(self, gcLoc, scLoc):
         msg = str(gcLoc) + " " + str(scLoc)
@@ -514,9 +520,14 @@ class U3T_Game:
             ready = select.select([self.s], [], [])
             if ready[0]:
                 msg = self.s.recv(1024)
-                msg = msg.split()
-                coordinates = [int(msg[0]), int(msg[1])]
-                return coordinates
+                if(msg == 'forfeit'):
+                    self.s.close()
+                    self.drawEndGameMessage('X')
+                    coordinates = [-1, -1]
+                else:
+                    msg = msg.split()
+                    coordinates = [int(msg[0]), int(msg[1])]
+                    return coordinates
 
     # cancel creating a new game
     def cancelCreate(self):
@@ -526,3 +537,11 @@ class U3T_Game:
         s.send('cancel')
         self.r.destroy()
         print('Cancelled create')
+
+
+
+
+
+
+
+
