@@ -109,8 +109,10 @@ class Client(Frame):
         s.connect((self.primaryServerHost, self.primaryServerPort))
         s.send('list')
         msg = s.recv(4096)
-        msg.split()
+        msg = msg.split()
         s.close()
+
+        print('Game list:', msg)
 
         # creates a selectable list of games
         for game in msg:

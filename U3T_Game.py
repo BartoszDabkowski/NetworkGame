@@ -1,8 +1,6 @@
 __author__ = 'Bartosz'
 
 from Tkinter import *
-import time
-import tkMessageBox
 from socket import *
 import select
 
@@ -30,9 +28,9 @@ class U3T_Game:
         if(self.createOrJoin == 'create'):
             # waiting for player
             waitingLabel = Label(self.r, text=('Game ' + self.gameID + ': Waiting for player...'), font='Georgia 36', pady=10)
-            #cancelButton = Button(self.r, text='Cancel', command=lambda: self.cancelCreate())
+            # cancelButton = Button(self.r, text='Cancel', command=lambda: self.cancelCreate())
             waitingLabel.pack()
-            #cancelButton.pack()
+            # cancelButton.pack()
             self.r.update()
 
             self.player = 'O'
@@ -49,7 +47,6 @@ class U3T_Game:
             print('server: connected')
 
             waitingLabel.destroy()
-            #cancelButton.destroy()
 
         # if you join then you will connect to a 'server'
         else:
@@ -59,7 +56,6 @@ class U3T_Game:
             self.s.connect((self.host, self.port))
             self.s.setblocking(0)
             print('client: connected')
-
 
         # draw the board
         self.canvas.pack()
@@ -112,6 +108,7 @@ class U3T_Game:
         self.s.send(gameResult)
         self.s.close()
         self.freezeCells('!')
+
         self.drawEndGameMessage('O')
 
     def drawGameBoard(self):
@@ -156,10 +153,9 @@ class U3T_Game:
             self.printStats()
             self.r.update()
             self.sendMove(gcLoc, scLoc)                 # Socket send code
-            if(gameCheck):
+            if(gameCheck == True):
                 self.s.close()
                 return
-            # send message
 
             #------NETWORKING------#
             ####################################
@@ -429,6 +425,8 @@ class U3T_Game:
             draw = PhotoImage(file="Draw.gif")
             l = Label(self.canvas, image=draw)
             l.image = draw
+            if (self.createOrJoin == 'create'):
+                self.sendGameResult(0)
 
         b = Button(self.canvas, text='Exit', command=self.r.destroy)
 
@@ -510,7 +508,6 @@ class U3T_Game:
         print("+-------+")
         print('*==============================*')
 
-
     def sendMove(self, gcLoc, scLoc):
         msg = str(gcLoc) + " " + str(scLoc)
         self.s.send(msg)
@@ -524,6 +521,7 @@ class U3T_Game:
                     self.s.close()
                     self.drawEndGameMessage('X')
                     coordinates = [-1, -1]
+                    return coordinates
                 else:
                     msg = msg.split()
                     coordinates = [int(msg[0]), int(msg[1])]
@@ -537,11 +535,3 @@ class U3T_Game:
         s.send('cancel')
         self.r.destroy()
         print('Cancelled create')
-
-
-
-
-
-
-
-

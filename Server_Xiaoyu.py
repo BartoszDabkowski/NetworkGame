@@ -1,6 +1,5 @@
 __author__ = 'Xiaoyu'
 from socket import *
-import string
 import random
 
 # initialize variables
@@ -215,6 +214,7 @@ while 1:
         if game_list[len(game_list) - 1].player == 'Waiting':
             gameList += str(game_list[len(game_list) - 1].ID)
 
+        print('Game list:', gameList)
         connectionSocket.send(gameList)
         print_game_list()
 
