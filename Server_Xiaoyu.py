@@ -90,7 +90,7 @@ while 1:
         current.name = 'Game ' + str(current.ID)
 
         port = random.randint(10000, 65535)
-        current.creator = addr
+        current.creator = list(addr)
         current.creator[1] = port
 
         respond = str(current.ID) + '_' + str(port)
@@ -108,7 +108,7 @@ while 1:
                     print'ERROR: Game Not Available'
                 else:
                     # add player addr to the game list
-                    game.player = addr
+                    game.player = list(addr)
 
                     # send creator addr back to player
                     response = str(game.creator)
@@ -208,14 +208,14 @@ while 1:
 
     elif request == 'list':
 
-        list = ""
+        gameList = ""
         for game in game_list[:-1]:
             if game.player == 'Waiting':
-                list += str(game.ID) + ' '
+                gameList += str(game.ID) + ' '
         if game_list[len(game_list) - 1].player == 'Waiting':
-            list += str(game_list[len(game_list) - 1].ID)
+            gameList += str(game_list[len(game_list) - 1].ID)
 
-        connectionSocket.send(list)
+        connectionSocket.send(gameList)
         print_game_list()
 
     elif request == 'top':

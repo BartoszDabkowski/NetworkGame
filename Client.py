@@ -79,7 +79,7 @@ class Client(Frame):
             scoreLabel.pack()
         else:
             if(len(topList) < 10):
-                x = len(topList)
+                x = len(topList)/2
             else:
                 x = 10
             for score in range(0, x):
