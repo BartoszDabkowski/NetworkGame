@@ -8,16 +8,16 @@ import select
 
 class U3T_Game:
 
-    def __init__(self, r, createOrJoin, host, port, gameID, primaryServerHost, primaryServerPort):
+    def __init__(self, r, createOrJoin, host, port, primaryServerHost, primaryServerPort, gameID):
         self.r = r
-        self.primaryServerHost = primaryServerHost
-        self.primaryServerPort = primaryServerPort
-        self.gameID = gameID
         self.canvas = Canvas(r, width=700, height=700)
         self.createOrJoin = createOrJoin
         self.gameOn = False
         self.host = host
         self.port = port
+        self.primaryServerHost = primaryServerHost
+        self.primaryServerPort = primaryServerPort
+        self.gameID = gameID
         self.gameCells = ['~' for x in range(9)]
         self.scButtons = [[[Label, 0, 0] for x in range(9)] for y in range(9)]
         self.singleCells = [['~' for x in range(9)] for y in range(9)]
@@ -27,27 +27,33 @@ class U3T_Game:
 #====================================================================================================
 
     def initializeGame(self):
-        self.canvas.pack()
-        self.drawGameBoard()
-
+        # if you create you become the 'server'
         if(self.createOrJoin == 'create'):
-            tkMessageBox.showinfo(title='Waiting', message='Waiting for player...')
+            # waiting for player
+            waitingLabel = Label(self.r, text=('Game ' + self.gameID + ': Waiting for player...'), font='Georgia 36', pady=10)
+            cancelButton = Button(self.r, text='Cancel', command=lambda: self.cancelCreate())
+            waitingLabel.pack()
+            cancelButton.pack()
+            self.r.update()
 
             self.player = 'O'
 
             print('waiting')
 
             # become a server and wait for a connection
-            sock = socket(AF_INET, SOCK_STREAM)
-            sock.bind(('', self.port))
-            sock.listen(5)
+            self.sock = socket(AF_INET, SOCK_STREAM)
+            self.sock.bind(('', self.port))
+            self.sock.listen(5)
 
-            self.s, addr = sock.accept()
+            self.s, addr = self.sock.accept()
             self.s.setblocking(0)
             print('server: connected')
 
+            waitingLabel.destroy()
+
             self.gameOn = True
 
+        # if you join then you will connect to a 'server'
         else:
             self.player = 'X'
 
@@ -57,7 +63,11 @@ class U3T_Game:
             print('client: connected')
 
             self.gameOn = True
-            self.highlightGameBoard(True)
+
+        # draw the board
+        self.canvas.pack()
+        self.drawGameBoard()
+        self.r.update()
 
         img = PhotoImage(master=self.canvas, file="imageXO.gif", width=55, height=55)
         bigCells = [50, 250, 450]
@@ -84,15 +94,18 @@ class U3T_Game:
                 scLoc = 0
         gcLoc = 0
 
-        b = Button(self.canvas, text='Exit', command=self.drawEndGameMessage('O'))
-        b.place(x=325, y=675)
+        forfeitButton = Button(self.canvas,text='Forfeit', command=self.drawEndGameMessage('O'))
+        forfeitButton.place(x=325, y=675)
 
         # create player is second to go. First freeze everything and receive first cord.
+        # join players whole board lights up
         if(self.createOrJoin == 'create'):
             self.freezeCells('!')
             coordinates = self.receiveMove()
             print(coordinates[0], coordinates[1])
             self.receiveCoord(coordinates)
+        else:
+            self.highlightGameBoard(True)
 
 
 #====================================================================================================
@@ -137,8 +150,8 @@ class U3T_Game:
             self.freezeCells(scLoc)                    #Uncomment this and comment NETWORKING to fix
             self.determineWinner()
             self.printStats()
+            self.r.update()
             self.sendMove(gcLoc, scLoc)                 # Socket send code
-            time.sleep(1)
             # send message
 
             #------NETWORKING------#
@@ -389,7 +402,6 @@ class U3T_Game:
 #====================================================================================================
 
     def drawEndGameMessage(self, player):
-    
         if player == 'X':
             win = PhotoImage(file="youWin.gif")
             l = Label(self.canvas, image=win)
@@ -504,13 +516,11 @@ class U3T_Game:
                 coordinates = [int(msg[0]), int(msg[1])]
                 return coordinates
 
-    # exit/close window and quit the game
-    def closeAndQuit(self, frame, socket):
-        quit = tkMessageBox.askokcancel(title='Quit?', message='Are you sure you want to quit?')
-
-        if quit == True:
-            self.gameOn = False
-            socket.send('quit')
-            frame.destroy()
-        else:
-            return
+    # cancel creating a new game
+    def cancelCreate(self):
+        self.sock.close()
+        s = socket(AF_INET, SOCK_STREAM)
+        s.connect((self.primaryServerHost, self.primaryServerPort))
+        s.send('cancel')
+        self.r.destroy()
+        print('Cancelled create')

@@ -12,7 +12,7 @@ class Client(Frame):
         Frame.__init__(self, master)
         self.master    = master
         self.primaryServerPort = 12000
-        self.primaryServerHost = '192.168.1.125'
+        self.primaryServerHost = 'uw1-320-14.uwb.edu'
 
         # create main frame
         mainFrame = Frame(master, width=700, height=700)
@@ -23,6 +23,12 @@ class Client(Frame):
         titleLabel = Label(mainFrame, image=titlePhoto)
         titleLabel.image = titlePhoto
         titleLabel.pack()
+
+        # create top score button
+        topPhoto = PhotoImage(file='top.gif')
+        topButton = Button(mainFrame, image=topPhoto, command=lambda: self.top())
+        topButton.image = topPhoto
+        topButton.pack()
 
         # create join button
         joinPhoto = PhotoImage(file='join.gif')
@@ -41,6 +47,51 @@ class Client(Frame):
         exitButton = Button(mainFrame, image=exitPhoto, command=lambda: self.close(self.master))
         exitButton.image = exitPhoto
         exitButton.pack()
+
+    # top score
+    def top(self):
+        topWindow = Toplevel()
+        topWindow.title('Top Scores')
+
+        topLabel = Label(topWindow, text='Top Scores', font='Georgia 36')
+        topLabel2 = Label(topWindow, text='Ordered by number of wins')
+        topTitle = Label(topWindow, text='IP Address'.ljust(20) + 'Wins'.rjust(5))
+        topLabel.pack()
+        topLabel2.pack()
+        topTitle.pack()
+
+        # connect to primary server and ask for top score list
+        s = socket(AF_INET, SOCK_STREAM)
+        s.connect((self.primaryServerHost, self.primaryServerPort))
+        s.send('top')
+        topList = s.recv(4096)
+        topList.split()
+        s.close()
+
+        # for testing
+        #topList = ['123.123.123', '1', '123.123.123', '2', '123.123.123', '3']
+
+        ip = 0
+        wins = 1
+        # check length of list. Only do top 10 or less
+        if(topList == 'empty'):
+            scoreLabel = Label(topWindow, text='[No scores yet]')
+            scoreLabel.pack()
+        else:
+            if(len(topList) < 10):
+                x = len(topList)
+            else:
+                x = 10
+            for score in range(0, x):
+                scoreText = (topList[ip].ljust(20) + topList[wins].rjust(5))
+                scoreLabel = Label(topWindow, text=scoreText)
+                scoreLabel.pack()
+                ip += 2
+                wins += 2
+
+        # close window
+        closeButton = Button(topWindow, text='Close', command=lambda: self.close(topWindow))
+        closeButton.pack()
 
     # join game
     def join(self):
@@ -63,7 +114,7 @@ class Client(Frame):
 
         # creates a selectable list of games
         for game in msg:
-            game = game
+            game = 'Game ' + game
             listbox.insert(END, game)
 
         # join selected game
@@ -79,14 +130,21 @@ class Client(Frame):
         # connect to primary server and send the game ID
         s = socket(AF_INET, SOCK_STREAM)
         s.connect((self.primaryServerHost, self.primaryServerPort))
-        joinSelectedGame = 'join_' + selectedGame[0]
+        # parse Game x to just x
+        selectedGame = selectedGame[5:]
+        print(selectedGame)
+
+        joinSelectedGame = 'join_' + selectedGame
         s.send(joinSelectedGame)
         # receive the host and port from primary server
         msg = s.recv(4096)
+
+        print(msg)
+
         first = msg.find('\'')
         msg = msg[first + 1:]
-        ip = msg[:msg.find('\'')]
 
+        ip = msg[:msg.find('\'')]
         port = msg[msg.find(' ') + 1 : msg.find(')')]
 
         print ('connecting to: ', ip, port)
@@ -96,7 +154,8 @@ class Client(Frame):
 
         # new window for game
         gameWindow = Toplevel()
-        game = U3T_Game(gameWindow, 'join', ip, int(port),0, self.primaryServerHost, self.primaryServerPort)
+        gameWindow.geometry('+500+400')
+        game = U3T_Game(gameWindow, 'join', ip, int(port), self.primaryServerHost, self.primaryServerPort, selectedGame)
 
     # start a new game
     def create(self):
@@ -106,19 +165,23 @@ class Client(Frame):
         print('socket created')
         s.connect((self.primaryServerHost, self.primaryServerPort))
         print('sending ip and port')
-        host = ''
-        port = s.getsockname()[1]
         s.send('create')
 
         # receive game ID from primary server
-        gameID = s.recv(1024)
-        print('Game ID = ' + gameID)
+        gameIDandPort = s.recv(1024)
+        print('Game ID and port = ' + gameIDandPort)
         s.close()
+
+        host = ''
+        port = gameIDandPort[gameIDandPort.find('_') + 1:]
+        gameID = gameIDandPort[:gameIDandPort.find('_')]
 
         # new window for game
         gameWindow = Toplevel()
+        gameWindow.geometry('+500+400')
         gameWindow.title('You are in game: ' + gameID)
-        game = U3T_Game(gameWindow, 'create', host, int(port), gameID, self.primaryServerHost, self.primaryServerPort)
+
+        game = U3T_Game(gameWindow, 'create', host, int(port), self.primaryServerHost, self.primaryServerPort, gameID)
 
     # exit/close window
     def close(self, frame):
@@ -133,4 +196,3 @@ if __name__ == '__main__':
     client = Client(root)
 
     root.mainloop()
-
