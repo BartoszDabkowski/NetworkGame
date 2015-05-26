@@ -67,12 +67,8 @@ while 1:
 
     connectionSocket, addr = serverSocket.accept()
 
-    address = str(addr)
-    first = address.find('\'')
-    address = address[first + 1:]
-    ip = address[:address.find('\'')]
-    port = address[address.find(' ') + 1: address.find(')')]
-    print('ip and port: ', ip, port)
+
+    print('ip and port: ', addr)
 
     print('accepted')
 
@@ -93,14 +89,11 @@ while 1:
         current.ID = newGameID
         current.name = 'Game ' + str(current.ID)
 
-        #port = str(int(port) - 1)
+        port = random.randint(10000, 65535)
+        current.creator = addr
+        current.creator[1] = port
 
-        port = str(random.randint(10000, 65535))
-
-        newAddr = '(' + '\'' + ip + '\', ' + port + ')'
-        current.creator = newAddr
-
-        respond = str(current.ID) + '_' + port
+        respond = str(current.ID) + '_' + str(port)
 
         connectionSocket.send(respond)
         print_game_list()
@@ -139,25 +132,25 @@ while 1:
                     if result == '1':
                         # add creator
                         firstEntry = ScoreEntry()
-                        firstEntry.player = game.creator
+                        firstEntry.player = game.creator[0]
                         firstEntry.score += 1
                         score_board.append(firstEntry)
 
                         # add player
                         secondEntry = ScoreEntry()
-                        secondEntry.player = game.player
+                        secondEntry.player = game.player[0]
                         score_board.append(secondEntry)
 
                     else:
                         # add player
                         firstEntry = ScoreEntry()
-                        firstEntry.player = game.player
+                        firstEntry.player = game.player[0]
                         firstEntry.score += 1
                         score_board.append(firstEntry)
 
                         # add creator
                         secondEntry = ScoreEntry()
-                        secondEntry.player = game.creator
+                        secondEntry.player = game.creator[0]
                         score_board.append(secondEntry)
                 else:
 
@@ -165,11 +158,11 @@ while 1:
                     playerExist = 0
 
                     for entry in score_board:
-                        if entry.player == game.creator:
+                        if entry.player == game.creator[0]:
                             creatorExist = 1
                             if result == '1':
                                 entry.score += 1
-                        if entry.player == game.player:
+                        if entry.player == game.player[0]:
                             playerExist = 1
                             if result == '0':
                                 entry.score += 1
@@ -178,28 +171,28 @@ while 1:
                         if result == '1':
                             # add creator
                             firstEntry = ScoreEntry()
-                            firstEntry.player = game.creator
+                            firstEntry.player = game.creator[0]
                             firstEntry.score += 1
                             score_board.append(firstEntry)
 
                         else:
                             # add creator
                             secondEntry = ScoreEntry()
-                            secondEntry.player = game.creator
+                            secondEntry.player = game.creator[0]
                             score_board.append(secondEntry)
 
                     if playerExist == 0:
                         if result == '0':
                             # add player
                             firstEntry = ScoreEntry()
-                            firstEntry.player = game.player
+                            firstEntry.player = game.player[0]
                             firstEntry.score += 1
                             score_board.append(firstEntry)
 
                         else:
                             # add player
                             secondEntry = ScoreEntry()
-                            secondEntry.player = game.player
+                            secondEntry.player = game.player[0]
                             score_board.append(secondEntry)
 
                 game_list.remove(game)
@@ -235,9 +228,9 @@ while 1:
         else:
             for entry in score_board[:-1]:
                 # parse just the IP address
-                msg += str(entry.player) + ' ' + str(entry.score) + ' '
+                msg += entry.player + ' ' + str(entry.score) + ' '
 
-            msg += str(score_board[len(score_board) - 1].player) + ' ' + str(score_board[len(score_board) - 1].score)
+            msg += score_board[len(score_board) - 1].player + ' ' + str(score_board[len(score_board) - 1].score)
 
             connectionSocket.send(msg)
             print msg

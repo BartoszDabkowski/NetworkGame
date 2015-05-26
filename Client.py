@@ -140,22 +140,27 @@ class Client(Frame):
         msg = s.recv(4096)
 
         print(msg)
+        if(msg == 'Game Not Available'):
+            tkMessageBox.showinfo('Not available', 'No longer available. Choose again')
+            s.close()
+            joinWindow.destroy()
+        else:
+            first = msg.find('\'')
+            msg = msg[first + 1:]
 
-        first = msg.find('\'')
-        msg = msg[first + 1:]
+            ip = msg[:msg.find('\'')]
+            port = msg[msg.find(' ') + 1 : msg.find(')')]
 
-        ip = msg[:msg.find('\'')]
-        port = msg[msg.find(' ') + 1 : msg.find(')')]
+            print ('connecting to: ', ip, port)
 
-        print ('connecting to: ', ip, port)
+            # close socket and destroy window
+            s.close()
+            joinWindow.destroy()
 
-        # close the join window
-        joinWindow.destroy()
-
-        # new window for game
-        gameWindow = Toplevel()
-        gameWindow.geometry('+500+400')
-        game = U3T_Game(gameWindow, 'join', ip, int(port), self.primaryServerHost, self.primaryServerPort, selectedGame)
+            # new window for game
+            gameWindow = Toplevel()
+            gameWindow.geometry('+500+400')
+            game = U3T_Game(gameWindow, 'join', ip, int(port), self.primaryServerHost, self.primaryServerPort, selectedGame)
 
     # start a new game
     def create(self):
