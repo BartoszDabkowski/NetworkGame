@@ -12,7 +12,7 @@ class Client(Frame):
         Frame.__init__(self, master)
         self.master    = master
         self.primaryServerPort = 12000
-        self.primaryServerHost = 'uw1-320-14.uwb.edu'
+        self.primaryServerHost = 'uw1-320-07.uwb.edu'
 
         # create main frame
         mainFrame = Frame(master, width=700, height=700)
@@ -65,7 +65,7 @@ class Client(Frame):
         s.connect((self.primaryServerHost, self.primaryServerPort))
         s.send('top')
         topList = s.recv(4096)
-        topList.split()
+        topList = topList.split()
         s.close()
 
         # for testing

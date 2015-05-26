@@ -129,9 +129,11 @@ while 1:
         # update game result
         gameID, result = gameID.split(' ')
 
+        print('End game results', request, gameID, result)
+
         # remove entry from game list
         for game in game_list:
-            if game.ID == str(gameID):
+            if str(game.ID) == gameID:
 
                 if len(score_board) == 0:
                     if result == '1':
@@ -232,6 +234,7 @@ while 1:
             print('No scores')
         else:
             for entry in score_board[:-1]:
+                # parse just the IP address
                 msg += str(entry.player) + ' ' + str(entry.score) + ' '
 
             msg += str(score_board[len(score_board) - 1].player) + ' ' + str(score_board[len(score_board) - 1].score)

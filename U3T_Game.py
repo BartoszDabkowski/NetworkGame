@@ -50,6 +50,7 @@ class U3T_Game:
             print('server: connected')
 
             waitingLabel.destroy()
+            cancelButton.destroy()
 
             self.gameOn = True
 
@@ -94,7 +95,7 @@ class U3T_Game:
                 scLoc = 0
         gcLoc = 0
 
-        forfeitButton = Button(self.canvas,text='Forfeit', command=self.drawEndGameMessage('O'))
+        forfeitButton = Button(self.canvas,text='Forfeit', command=lambda: self.drawEndGameMessage('X'))
         forfeitButton.place(x=325, y=675)
 
         # create player is second to go. First freeze everything and receive first cord.
@@ -241,6 +242,7 @@ class U3T_Game:
                 if self.gameCells[i] == '~':
                     self.gameCells[i] = '@'
                 self.highlightCellSection(False, i)
+                self.r.update()
             return
         ####################################
 
@@ -431,7 +433,7 @@ class U3T_Game:
 
         s = socket(AF_INET, SOCK_STREAM)
         s.connect((self.primaryServerHost, self.primaryServerPort))
-        gameResult = 'end_' + self.gameID + " " + result
+        gameResult = 'end_' + str(self.gameID) + " " + str(result)
         s.send(gameResult)
         s.close()
 
@@ -478,7 +480,7 @@ class U3T_Game:
                 for k in range(3):
                     print("|"),
                     print(self.singleCells[gcLoc][scLoc], self.singleCells[gcLoc][scLoc + 1],\
-                        self.singleCells[gcLoc][scLoc + 2],)
+                        self.singleCells[gcLoc][scLoc + 2]),
                     gcLoc += 1
                     if j == 2:
                         gcCheck += 1
