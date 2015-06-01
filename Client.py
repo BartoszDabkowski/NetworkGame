@@ -2,9 +2,16 @@
 # Bethel Heo, Bartosz Dabkowski, Xiiaoyu Liang
 #
 # Client.py
-# Program for the game, connection to server, and P2P connection
+# Main loop for the program. Opens the initial GUi which has buttons to allow the user to view the
+# top score, join a game, create a new game, and exit the application. Top score will open a new window
+# that gets information from the primary server of the highest wins. Join will open a window which will
+# get a list from the primary server that shows the available games to join. Create will open a new
+# game window. And exit will close the program. When joining a game or creating a new game the game
+# connection duties is handed off to the U3T_Game class for the P2P connection for each game client.
+#
 
 from U3T_Game import *
+import tkMessageBox
 
 class Client(Frame):
 
@@ -48,11 +55,15 @@ class Client(Frame):
         exitButton.image = exitPhoto
         exitButton.pack()
 
+#====================================================================================================
+
     # top score
     def top(self):
+        # new window for the top score
         topWindow = Toplevel()
         topWindow.title('Top Scores')
 
+        # top score title
         topLabel = Label(topWindow, text='Top Scores', font='Georgia 36')
         topLabel2 = Label(topWindow, text='Ordered by number of wins')
         topTitle = Label(topWindow, text='IP Address'.ljust(20) + 'Wins'.rjust(5))
@@ -64,12 +75,10 @@ class Client(Frame):
         s = socket(AF_INET, SOCK_STREAM)
         s.connect((self.primaryServerHost, self.primaryServerPort))
         s.send('top')
+        # receive list from primary server
         topList = s.recv(4096)
         topList = topList.split()
         s.close()
-
-        # for testing
-        #topList = ['123.123.123', '1', '123.123.123', '2', '123.123.123', '3']
 
         ip = 0
         wins = 1
@@ -93,11 +102,15 @@ class Client(Frame):
         closeButton = Button(topWindow, text='Close', command=lambda: self.close(topWindow))
         closeButton.pack()
 
+#====================================================================================================
+
     # join game
     def join(self):
+        # new window to show game list
         joinWindow = Toplevel()
         joinWindow.title('Select a game to join')
 
+        # scroll bar and list box
         scrollbar = Scrollbar(joinWindow, orient=VERTICAL)
         listbox = Listbox(joinWindow, yscrollcommand=scrollbar.set)
         scrollbar.config(command=listbox.yview)
@@ -108,6 +121,7 @@ class Client(Frame):
         s = socket(AF_INET, SOCK_STREAM)
         s.connect((self.primaryServerHost, self.primaryServerPort))
         s.send('list')
+        # receive game list
         msg = s.recv(4096)
         msg = msg.split()
         s.close()
@@ -127,6 +141,8 @@ class Client(Frame):
         closeButton = Button(joinWindow, text='Close', command=lambda: self.close(joinWindow))
         closeButton.pack()
 
+#====================================================================================================
+
     # join selected game
     def joinGame(self, selectedGame, joinWindow):
         # connect to primary server and send the game ID
@@ -136,12 +152,13 @@ class Client(Frame):
         selectedGame = selectedGame[5:]
         print(selectedGame)
 
+        # send to the primary server the game to join
         joinSelectedGame = 'join_' + selectedGame
         s.send(joinSelectedGame)
         # receive the host and port from primary server
         msg = s.recv(4096)
 
-        print(msg)
+        # if the game list isn't fully updated with most recent then close the window to reload
         if(msg == 'Game Not Available'):
             tkMessageBox.showinfo('Not available', 'No longer available. Choose again')
             s.close()
@@ -150,6 +167,7 @@ class Client(Frame):
             first = msg.find('\'')
             msg = msg[first + 1:]
 
+            # parse ip and port of the selected game
             ip = msg[:msg.find('\'')]
             port = msg[msg.find(' ') + 1 : msg.find(')')]
 
@@ -163,6 +181,8 @@ class Client(Frame):
             gameWindow = Toplevel()
             gameWindow.geometry('+500+400')
             game = U3T_Game(gameWindow, 'join', ip, int(port), self.primaryServerHost, self.primaryServerPort, selectedGame)
+
+#====================================================================================================
 
     # start a new game
     def create(self):
@@ -179,6 +199,7 @@ class Client(Frame):
         print('Game ID and port = ' + gameIDandPort)
         s.close()
 
+        # receive randomly generated port number from primary server
         host = ''
         port = gameIDandPort[gameIDandPort.find('_') + 1:]
         gameID = gameIDandPort[:gameIDandPort.find('_')]
@@ -189,6 +210,8 @@ class Client(Frame):
         gameWindow.title('You are in game: ' + gameID)
 
         game = U3T_Game(gameWindow, 'create', host, int(port), self.primaryServerHost, self.primaryServerPort, gameID)
+
+#====================================================================================================
 
     # exit/close window
     def close(self, frame):
